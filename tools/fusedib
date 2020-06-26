@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+#
+# This script attempts to take a 'standalone DIB' and put it together with
+# SMF frames and/or XPK files.
+#
+
+require 'optparse'
+
+$LOAD_PATH.unshift File.join(__dir__, "..", "lib")
+require 'dib'
+
+dib_path = nil
+smf_path = nil
+
+parser = OptionParser.new do |opts|
+  opts.on("-d", "--dib PATH") { |path| dib_path = File.expand_path(path) }
+  opts.on("-s", "--smf PATH") { |path| smf_path = File.expand_path(path) }
+end
+parser.parse!(ARGV)
+
+if not dib_path
+  $stderr.puts("error, expected a DIB path")
+  exit 1
+end
+
+if not smf_path
+  $stderr.puts("error, expected a SMF path")
+  exit 1
+end
+
+dibfile = DIB.new(dib_path)
+
+
+smffile = File.open(smf_path, "r")
+
+$stderr.puts(dibfile.inspect)
+
+# XXX only works on ./_d1s32b.SMF
+smffile.seek(2737363, :SET)
+$stdout.puts(smffile.read(88064))
+smffile.close

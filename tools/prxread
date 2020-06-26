@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+which_asset = nil
+$inspect = false
+do_names = false
+extracting = false
+
+parser = OptionParser.new do |opts|
+  opts.on("--asset N") { |n| which_asset = n.to_i; extracting = true }
+  opts.on("--inspect") { $inspect = true }
+  opts.on("--names") { do_names = true }
+end
+parser.parse!(ARGV)
+
+infile = ARGV.shift
+
+if not infile
+  $stderr.puts("expected an input file")
+  exit 1
+end
+
+infile = File.expand_path(infile)
+
+if not File.file?(infile)
+  $stderr.printf("%s is not a regular file\n", infile.inspect)
+  exit 1
+end
+
+prxfile = File.open(infile, "r")
+
+char1 = prxfile.read(1).unpack("C*").first
+if char1 != 1
+  $stderr.printf("first character is not 1, got %d", char1)
+  prxfile.close
+  exit 1
+end
+
+prxfile.read(137) # 128 + 10 - 1, i guess -- all zeroes O_o
+_n = prxfile.read(4).unpack("S*") # uint16_t
+$n = _n.first # number of assets in this archive
+$stderr.puts _n.inspect
+prxfile.read(2) # padding, i guess 
+
+header2 = prxfile.read(1).unpack("C*").first
+if header2 != 1
+  $stderr.printf("first character is not 1, got %d", char1)
+  prxfile.close
+  exit 1
+end
+prxfile.read(7) # 8 - 1
+$stderr.puts prxfile.read(4).unpack("C*").inspect # FFFF
+prxfile.read(4).unpack("C*").inspect # zeroes
+prxfile.read(8).unpack("C*").inspect # zeroes
+$stderr.puts prxfile.read(8).unpack("C*").inspect # the number 2, then 7 zeroes
+$stderr.puts prxfile.read(4).unpack("C*").inspect # the number 76, or ascii 'L'
+
+total_size = 0
+$size_map = {}
+
+$n.times do |x|
+  format = prxfile.read(3) # 3 characters plus NUL but I don't want to print the null
+  prxfile.read(1) # null for the last string; ignore
+  some_id = prxfile.read(4).unpack("L*")
+  rest2 = prxfile.read(16).unpack("L*") # uint32_t, i.e. size_t 
+  size_of_this_asset = rest2.first
+  $size_map[x] = size_of_this_asset
+  total_size = total_size + size_of_this_asset
+  $stderr.puts "\t#{x}: #{format} -> #{some_id.inspect}\t#{rest2.inspect}"
+end
+
+$stderr.puts
+$stderr.puts "ftell: #{prxfile.tell}"
+$stderr.puts "TOTAL SIZE OF ALL ASSETS?: #{total_size} = #{total_size/1024} KB"
+$stderr.puts
+
+$stderr.puts prxfile.read(20).unpack("C*").inspect
+$stderr.puts prxfile.read(16).unpack("C*").inspect
+
+# list the names of each file inside of this archive
+def names(prxfile)
+  (0...$n).each do |asset|
+    $stdout.print("#{asset}\t")
+    prxfile.read(4) # file format + nul
+
+    # the two numbers that keep showing up together -- i'm beginning to think
+    # it's actualy 1 16-bit word
+    prxfile.read(2) 
+
+    $stdout.puts(prxfile.read(15).gsub("\000", "")) # 16-char name, minus one nul
+    prxfile.read(1) # nul burn
+    prxfile.read(6) # idk what this is 
+    prxfile.read($size_map[asset]) # skip the actual data
+  end
+end
+
+def seek_and_read(prxfile, which_asset)
+  (0...which_asset).each do |asset|
+    prxfile.read(28) # skip the header
+    prxfile.read($size_map[asset]) # skip the data
+  end
+  
+  $stderr.puts prxfile.read(3) # 3 chars plus nul but we'll skip nul
+  prxfile.read(1) # nul from above; burn it
+  $stderr.puts prxfile.read(1).unpack("C*").inspect # this is the same number as one of the ones above!
+  $stderr.puts prxfile.read(1).unpack("C*").inspect # dunno what this is
+  $stderr.puts prxfile.read(15).inspect # name or id of this asset
+  prxfile.read(1) # nul burn (15+1=16)
+  $stderr.puts prxfile.read(6).unpack("C*").inspect
+  $stderr.puts "ftell: #{prxfile.tell}"
+  
+  return prxfile.read($size_map[which_asset])
+end
+
+if do_names
+  names(prxfile)
+else
+  exit 0 if not which_asset
+  data = seek_and_read(prxfile, which_asset)
+
+  if $inspect
+    $stdout.puts(data.inspect)
+  else
+    $stdout.print(data)
+    $stdout.flush
+  end
+end
+
+prxfile.close

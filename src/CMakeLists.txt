@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.0)
+project(lunapurpura)
+
+add_subdirectory(clu)
+add_subdirectory(dib)
+add_subdirectory(lputil)
+add_subdirectory(prd)
+add_subdirectory(prx)
+add_subdirectory(smf)
+add_subdirectory(xpk)
+
+if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
+  add_subdirectory(lua)
+endif()
+
+if(${LUNAPURPURA_BUILD_MRUBY_BINDINGS})
+  add_subdirectory(mruby)
+endif()

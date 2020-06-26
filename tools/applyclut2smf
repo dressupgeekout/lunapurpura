@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'tempfile'
+
+$LOAD_PATH.unshift File.join(__dir__, "..", "lib")
+require 'clu'
+
+clufile = nil
+smffile = nil
+
+parser = OptionParser.new do |opts|
+  opts.on("-c", "--clu PATH") { |path| clufile = File.expand_path(path) }
+  opts.on("-s", "--smf PATH") { |path| smffile = File.expand_path(path) }
+end
+parser.parse!(ARGV)
+
+if not clufile
+  $stderr.puts("expecting a clu file!")
+  exit 1
+end
+
+if not smffile
+  $stderr.puts("expecting a smf file!")
+  exit 1
+end
+
+clu = CLU.new(clufile)
+$stderr.puts(clu.inspect)
+
+smffile_size = File.size(smffile)
+smffile = File.open(smffile, "r")
+
+pixeldata = smffile.read.unpack("C*")
+
+this_off = 0
+counter = 0
+
+until this_off > smffile_size
+  smffile.seek(this_off, :SET)
+  tf = Tempfile.new(File.basename($0))
+  done = false
+  bytes_so_far = 0
+  until done
+    count = smffile.read(1).unpack("C*").first 
+    index = smffile.read(1).unpack("C*").first
+    #$stderr.puts([count, index].inspect)
+    if count == 0
+      if index == 1
+        done = true
+        break
+      end
+    else
+      count.times do
+        tf.write clu.array[index].pack("C*")
+        bytes_so_far = bytes_so_far + 3
+      end
+    end
+  end
+  if bytes_so_far < 640*480*3
+    tf.write("\x00"*(640*480*3 - bytes_so_far))
+  end
+  tf.close
+  cmd = %Q(gm convert -depth 8 -size 640x480 rgb:#{tf.path} #{sprintf("/tmp/%08d.png", counter)})
+  $stderr.puts(cmd)
+  system cmd
+  tf.unlink
+  this_off = this_off + 1024*4
+  counter += 1
+end
+
+smffile.close

@@ -1,1 +1,107 @@
 # Luna Purpura
+
+_**This software is totally a work in progress and very few things are
+actually functional.  It's still in a research phase.**_
+
+**Luna Purpura** is a portable reimplementation of Purple Moon's classic
+computer games from the 1990s:
+
+- _Rockett's New School_
+- _Rockett's Tricky Decision_
+- _Rockett's Secret Invitation_
+- ...and more
+
+It is a modern interpreter of the original game files. The goal is: if you
+have the original CD-ROMs, then you can play these games on today's
+computers, even on platforms which Purple Moon did not originally support.
+You should also be able to use the engine to make your own games, too!
+
+Support for _Secret Paths in the Forest_ and the other _Secret Paths_ games
+is planned, but not currently being worked on. Get in touch if you'd like to
+help out!
+
+
+## Building Luna Purpura
+
+In order to build games and support libraries from Luna Purpura, you must
+have CMake.
+
+```sh
+$ mkdir build
+$ cd build
+$ cmake .. [options]
+$ make
+```
+
+The following CMake configuration options are supported:
+
+- BOOL `LUNAPURPURA_DEBUG` -- Enable debug output
+- BOOL `LUNAPURPURA_BUILD_LUA_BINDINGS` -- Build the LuaJIT bindings
+- BOOL `LUNAPURPURA_BUILD_MRUBY_BINDINGS` -- Build the mruby bindings
+
+If you turn on the Lua bindings, you need to also define the following:
+
+- PATH `LUAJIT_INCLUDEDIR` -- Location of LuaJIT's header files
+- PATH `LUAJIT_LIBDIR` -- Location of LuaJIT's library
+
+If you turn on the mruby bindings, you need to also define the following:
+
+- PATH `MRUBY_INCLUDEDIR` -- Location of mruby's header files
+- PATH `MRUBY_LIBDIR` -- Location of mruby's library
+
+If you want, you can build a specific support library by `make`-ing a
+particular target:
+
+- `make lpclu` -- build only the library for CLU files
+- `make lpdib` -- ... for DIB files
+- `make lpprx` -- ... for PRX files
+- `make lpsmf` -- ... for SMF files
+- `make lpxpk` -- ... for XPK files
+
+
+### build.sh Usage
+
+For the most basic use cases, we provide an easy script that does it all for
+you:
+
+```sh
+$ ./build.sh [make(1) args ...]
+```
+
+You can force a fresh, clean rebuild with the 'clean' argument:
+
+```sh
+$ ./build.sh clean
+```
+
+
+## Using the tools
+
+Currently, the most feature-complete software are the Ruby scripts in the
+`tools/` directory. Most versions of Ruby >= 2.3 should work just fine on
+them.  Note that these are merely prototypes which are designed to make
+research on Purple Moon's exotic file formats easier. Eventually, the C
+implementation will become Luna Purpura's reference code.
+
+
+## Actually playing games
+
+Currently, we're targeting [LÖVE][love] as the means to creating actually
+playable games. This means coming up with C code to decode the game files,
+and then devising Lua bindings so that a LÖVE application can access them.
+
+LÖVE is merely an implementation detail for rapid prototyping. A more
+sophisticated, portable and standalone implementation -- written in C and
+likely based on SDL -- will eventually come around. But in any case, we
+expect that scripts will be used in some capacity, no matter what.
+
+
+## License
+
+Luna Purpura is released under a highly permissive 2-clause BSD-style
+license. Take a look at the LICENSE document for more details.
+
+
+[![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
+
+[love]: https://love2d.org
