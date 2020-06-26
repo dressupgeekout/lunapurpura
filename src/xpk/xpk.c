@@ -10,6 +10,8 @@
 #include <lpstatus.h>
 #include <lputil.h>
 
+#include <clu.h>
+
 #include "xpk.h"
 
 uint8_t XPK_MAGIC[4] = {165, 126, 112, 1};
@@ -71,6 +73,8 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 		return NULL;
 	}
 
+	xpk->clu = NULL;
+
 	ReadUint8(f, 2, xpk->co2);
 	ReadUint16(f, 1, &xpk->n_entries);
 	xpk->a = 0; /* XXX dunno */
@@ -115,6 +119,7 @@ XPK_Free(XPK *xpk)
 	for (int i = 0; i < xpk->n_entries; i++) {
 		XPKEntry_Free(xpk->entries[i]);
 	}
+	CLU_Free(xpk->clu);
 	free(xpk);
 
 }
@@ -127,4 +132,15 @@ XPK_EntryAtIndex(const XPK *xpk, const int index)
 		return NULL;
 	}
 	return xpk->entries[index];
+}
+
+
+/*
+ * Attaching the CLU here transfers ownership to the XPK. Don't try to free the
+ * XPK and then free the CLU directly, that's a double-free.
+ */
+void
+XPK_AttachCLU(XPK *xpk, CLU *clu)
+{
+	xpk->clu = clu;
 }
