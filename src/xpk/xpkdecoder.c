@@ -268,6 +268,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 		}
 	}
 
+	*status = LUNAPURPURA_OK;
 	return rgba;
 }
 
