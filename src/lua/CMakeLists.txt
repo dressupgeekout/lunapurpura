@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(lunapurpura)
 
-find_library(LIBLUAJIT NAMES luajit PATHS ${LUAJIT_LIBDIR})
+find_library(LIBLUAJIT NAMES luajit PATHS ${LUAJIT_LIBDIR} REQUIRED)
 
 ########## ########## ##########
 
@@ -49,6 +49,7 @@ target_include_directories(luaxpk PUBLIC
 
 target_include_directories(luaxpk PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../xpk
+  ${CMAKE_CURRENT_LIST_DIR}/../clu
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 

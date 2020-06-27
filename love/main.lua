@@ -19,12 +19,15 @@ local function dump_clu(clu)
 	print("========")
 end
 
-local function render_xpk(xpk, ...)
+local function get_image_from_xpk(xpk, ...)
 	local index = ... or 1
-	local pic = XPK.EntryAtIndex(xpk, index)
-	--[[XXX arbitrary color for now, until we're able to properly decode:]] 
-	love.graphics.setColor(0.5, 0.5, 0.5)
-	love.graphics.rectangle("fill", pic.x, pic.y, pic.width, pic.height)
+	local data = XPK.Decode(xpk, index)
+	local entry = XPK.EntryAtIndex(xpk, index)
+	return {
+		x = entry.x,
+		y = entry.y,
+		image = love.graphics.newImage(love.image.newImageData(entry.width, entry.height, "rgba8", data)),
+	}
 end
 
 --------- --------- ---------
@@ -42,6 +45,7 @@ function love.load()
 
 	clus = {}
 	xpks = {}
+	decoded_xpks = {}
 
 	current_clu_index = 1
 	current_xpk_index = 1
@@ -63,14 +67,23 @@ function love.load()
 	table.insert(clus, CLU.NewFromFile("RESOURCE/_credits.CLU"))
 	table.insert(clus, CLU.NewFromFile("RESOURCE/_pm_splash.CLU"))
 
-	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol1_h.XPK"))
-	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol2_h.XPK"))
-	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol3_h.XPK"))
-	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol4_h.XPK"))
-	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol5_h.XPK"))
-	--table.insert(xpks, XPK.NewFromFile("RESOURCE/_new_h.XPK"))
-	--table.insert(xpks, XPK.NewFromFile("RESOURCE/_sel_h.XPK"))
-	--table.insert(xpks, XPK.NewFromFile("RESOURCE/_end_h.XPK"))
+	local clu_hkeep = clus[6]
+
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol1_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol2_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol3_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol4_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_vol5_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_new_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_sel_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_end_h.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_hkeep_norm.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_tv_norm.XPK", clu_hkeep))
+	table.insert(xpks, XPK.NewFromFile("RESOURCE/_id_norm.XPK", clu_hkeep))
+
+	for _, xpk in ipairs(xpks) do
+		table.insert(decoded_xpks, get_image_from_xpk(xpk))
+	end
 end
 
 function love.update(dt)
@@ -110,7 +123,7 @@ function love.mousemoved(x, y, dx, dy, istouch)
 	end
 end
 
-function love.draw()
+local function draw_clus()
 	for row = 1, 16, 1 do
 		for column = 1, 16, 1 do
 			local r, g, b = CLU.ColorAtIndex(clus[current_clu_index], (row-1)*16+column)
@@ -128,11 +141,10 @@ function love.draw()
 		local r, g, b = CLU.ColorAtIndex(clus[current_clu_index], mouseover_entry+1)
 		love.graphics.print(string.format("Entry %d (%d,%d,%d)", mouseover_entry, r, g, b), 300, 0)
 	end
+end
 
-	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.rectangle("fill", love.graphics.getWidth() - 58 - 10, 10, 58, 25)
-
-	for _, xpk in ipairs(xpks) do
-		render_xpk(xpk)
+function love.draw()
+	for _, xpk in ipairs(decoded_xpks) do
+		love.graphics.draw(xpk.image, xpk.x, xpk.y)
 	end
 end
