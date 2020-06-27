@@ -74,7 +74,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 	/* Totally transparent RGBA matrix */
 	uint8_t *rgba = calloc(entry->width * entry->height, 4 * sizeof(uint8_t));
 
-	while (byte != XPKINST_EOF) {
+	while (!(byte == XPKINST_EOF && d->n_reps)) {
 		rv = ReadUint8(entry->xpk->file, 1, &byte);
 
 		if (!rv) {
@@ -175,7 +175,6 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					break;
 				case XPKINST_RLE:
 					/* 0x40 should be safe to ignore */
-					/* 0x41 is already taken care of (XPKINST_EOF) */
 					d->n_reps = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
 					warnx("RLE %d", argument);
