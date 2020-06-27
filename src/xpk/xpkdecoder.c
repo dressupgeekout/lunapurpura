@@ -8,6 +8,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#include <setjmp.h>
+#include <png.h>
+#endif
+
 #include <lpstatus.h>
 #include <lputil.h>
 
@@ -274,3 +279,63 @@ XPKDecoder_FreeRGBA(uint8_t *rgba)
 {
 	free(rgba);
 }
+
+#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+LPStatus
+XPKDecoder_RGBAToPNG(const uint8_t *rgba, const XPKEntry *entry, const char *path)
+{
+	/* XXX really should set up the error callbacks */
+	png_structp pngwriter = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (!pngwriter) {
+		return LUNAPURPURA_ERROR;
+	}
+
+	png_infop pnginfo = png_create_info_struct(pngwriter);
+
+	if (!pnginfo) {
+		png_destroy_write_struct(&pngwriter, (png_infopp)NULL);
+		return LUNAPURPURA_ERROR;
+	}
+
+	FILE *fp = fopen(path, "wb");
+
+	if (!fp) {
+		png_destroy_write_struct(&pngwriter, &pnginfo);
+		return LUNAPURPURA_CANTOPENFILE;
+	}
+
+	png_init_io(pngwriter, fp);
+
+	/*
+	 * libpng's documention requests that we setjmp() here in case libpng
+	 * crashes (it'll try to longjmp() back here in that event).
+	 */
+	if (setjmp(png_jmpbuf(pngwriter))) {
+		png_destroy_write_struct(&pngwriter, &pnginfo);
+		return LUNAPURPURA_ERROR;
+	}
+
+	png_set_IHDR(pngwriter, pnginfo, entry->width, entry->height, 8,
+		PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT);
+
+	png_write_info(pngwriter, pnginfo);
+
+	/*
+	 * We've got a 1-dimensional array of RGBA values, but libpng prefers a
+	 * 2-dimensional thing. Fortunately, there's a way around that.
+	 */
+	for (int i = 0; i < entry->height; i++) {
+		png_bytep row = (png_bytep)&rgba[4*entry->width*i];
+		png_write_row(pngwriter, row);
+	}
+
+	png_write_end(pngwriter, pnginfo);
+	png_destroy_write_struct(&pngwriter, &pnginfo);
+
+	fclose(fp);
+
+	return LUNAPURPURA_OK;
+}
+#endif /* LUNAPURPURA_XPK_PNG_SUPPORT */
