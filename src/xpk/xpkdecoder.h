@@ -38,6 +38,7 @@ typedef enum XPKDecoderInstruction XPKDecoderInstruction;
 struct XPKDecoder {
 	unsigned int n_reps;
 	unsigned int direct_counter;
+	uint16_t next_holder;
 	unsigned int repeat;
 	long repeat_loc;
 	unsigned int line_repeat;

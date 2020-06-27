@@ -29,6 +29,7 @@ xpk_decoder_init(XPKDecoder *d)
 {
 	d->n_reps = 0;
 	d->direct_counter = 0;
+	d->next_holder = 0;
 	d->repeat = 0;
 	d->repeat_loc = 0L;
 	d->line_repeat = 0;
@@ -153,10 +154,18 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					}
 					break;
 				case XPKINST_XSKIP:
-					d->cur_x += argument;
+					if (argument) {
+						d->cur_x += argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("XSKIP %d", argument);
+						warnx("XSKIP %d", argument);
 #endif
+					} else {
+						ReadUint16(entry->xpk->file, 1, &d->next_holder);
+						d->cur_x += d->next_holder;
+#ifdef LUNAPURPURA_XPK_TRACE
+						warnx("XSKIP %d", d->next_holder);
+#endif
+					}
 					break;
 				case XPKINST_BIGXSKIP:
 					d->cur_x += (16 + argument);
@@ -220,11 +229,19 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					}
 					break;
 				case XPKINST_SETXNL:
-					d->cur_x = argument;
-					d->cur_y++;
+					if (argument) {
+						d->cur_x = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("SETXNL %d", argument);
+						warnx("SETXNL %d", argument);
 #endif
+					} else {
+						ReadUint16(entry->xpk->file, 1, &d->next_holder);
+						d->cur_x = d->next_holder;
+#ifdef LUNAPURPURA_XPK_TRACE
+						warnx("SETXNL %d", d->next_holder);
+#endif
+					}
+					d->cur_y++;
 					break;
 				case XPKINST_BIGSETXNL:
 					d->cur_x = (16 + argument);
