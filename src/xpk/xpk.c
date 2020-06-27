@@ -13,6 +13,7 @@
 #include <clu.h>
 
 #include "xpk.h"
+#include "xpkdecoder.h"
 
 uint8_t XPK_MAGIC[4] = {165, 126, 112, 1};
 
@@ -44,7 +45,16 @@ XPKEntry_Free(XPKEntry *entry)
 void
 XPKEntry_Pretty(const XPKEntry *entry)
 {
-	printf("XPKEntry dimensions=%dx%d pos=%dx%d\n", entry->width, entry->height, entry->x, entry->y);
+	printf("XPKEntry offset=%d dimensions=%dx%d pos=%dx%d\n",
+		entry->offset, entry->width, entry->height, entry->x, entry->y);
+}
+
+
+uint8_t *
+XPKEntry_Decode(XPKEntry *entry, LPStatus *status)
+{
+	XPKDecoder decoder;
+	return XPKDecoder_Decode(&decoder, entry, status);
 }
 
 /* ********** */
@@ -74,6 +84,7 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 	}
 
 	xpk->clu = NULL;
+	xpk->file = f;
 
 	ReadUint8(f, 2, xpk->co2);
 	ReadUint16(f, 1, &xpk->n_entries);
@@ -96,6 +107,7 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 		ReadUint16(f, 1, &height);
 
 		XPKEntry *entry = XPKEntry_New(width, height, x, y);
+		entry->xpk = xpk;
 
 		if (!entry) {
 			*status = LUNAPURPURA_ERROR;
@@ -106,7 +118,29 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 		xpk->entries[i] = entry;
 	}
 
-	fclose(f);
+	/*
+	 * The offsets which are listed in the XPK file are not absolute, they are
+	 * relative to this position right here. But we'll go ahead and store the
+	 * absolute offsets in the XPK struct we're trying to create. (Nothing
+	 * wrong with that, right?)
+	 *
+	 * While generating this list, we'll enrich each of the XPKEntries we
+	 * created earlier with this new info.
+	 */
+	uint32_t offsets_start_pos = ftell(f);
+
+	/* XXX check for malloc error */
+	xpk->offsets = calloc(xpk->n_entries, sizeof(uint32_t));
+	uint32_t **p = &xpk->offsets;
+
+	for (int i = 0; i < xpk->n_entries; i++) {
+		uint32_t offset;
+		ReadUint32(f, 1, &offset);
+		uint32_t absolute_offset = offsets_start_pos + offset;
+		**p = absolute_offset;
+		xpk->entries[i]->offset = absolute_offset;
+		p++;
+	}
 
 	*status = LUNAPURPURA_OK;
 	return xpk;
@@ -116,12 +150,12 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 void
 XPK_Free(XPK *xpk)
 {
+	fclose(xpk->file);
 	for (int i = 0; i < xpk->n_entries; i++) {
 		XPKEntry_Free(xpk->entries[i]);
 	}
 	CLU_Free(xpk->clu);
 	free(xpk);
-
 }
 
 

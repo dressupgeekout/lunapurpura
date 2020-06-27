@@ -265,6 +265,9 @@ File.open("attempt.rgba", "w") do |f|
         when 0x6
           direct_counter = argument
           puts ">> DIRECT MODE ENGAGED for #{direct_counter} pixels" if $DEBUG
+        when 0x7
+          direct_counter = 16+argument
+          puts ">> DIRECT MODE ENGAGED for #{direct_counter} pixels" if $DEBUG
         when 0x8
           if argument == 0x0
             # XXX I'm not sure if that makes sense
@@ -306,6 +309,11 @@ File.open("attempt.rgba", "w") do |f|
           puts ">> NEWLINE + RLE #{n_reps}" if $DEBUG
         when 0xE
           direct_counter = argument
+          cur_x = 0
+          cur_y = cur_y + 1
+          puts ">> NEWLINE + DIRECT MODE ENGAGED for #{direct_counter} pixels" if $DEBUG
+        when 0xF
+          direct_counter = 16+argument
           cur_x = 0
           cur_y = cur_y + 1
           puts ">> NEWLINE + DIRECT MODE ENGAGED for #{direct_counter} pixels" if $DEBUG
