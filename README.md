@@ -3,10 +3,10 @@
 _**This software is totally a work in progress and very few things are
 actually functional.  It's still in a research phase.**_
 
-**Luna Purpura** is a portable reimplementation of Purple Moon's classic
+**Luna Purpura** is a portable reimplementation of [Purple Moon][]'s classic
 computer games from the 1990s:
 
-- _Rockett's New School_
+- [_Rockett's New School_](https://en.wikipedia.org/wiki/Rockett%27s_New_School)
 - _Rockett's Tricky Decision_
 - _Rockett's Secret Invitation_
 - ...and more
@@ -102,6 +102,14 @@ Luna Purpura is released under a highly permissive 2-clause BSD-style
 license. Take a look at the LICENSE document for more details.
 
 
+## Links
+
+- [Purple Moon on Wikipedia][Purple Moon]
+- [Purple Moon on Fandom.com][purple-moon-fandom]
+
+
 [![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
 
 [love]: https://love2d.org
+[Purple Moon]: https://en.wikipedia.org/wiki/Purple_Moon
+[purple-moon-fandom]: https://purplemoon.fandom.com/wiki/Purple_Moon_Wiki
