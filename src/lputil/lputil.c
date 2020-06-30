@@ -59,6 +59,17 @@ done:
 
 
 /*
+ * Reads `count` entries of signed 8-bit values from the `file`, and writes
+ * them to `dest`. Returns the count.
+ */
+size_t
+ReadChar(FILE *file, size_t count, char *dest)
+{
+	return fread(dest, sizeof(char), count, file);
+}
+
+
+/*
  * Reads `count` entries of unsigned 8-bit values from the `file`, and writes
  * them to `dest`. Returns the count.
  */
@@ -83,6 +94,19 @@ ReadUint16(FILE *file, size_t count, uint16_t *dest)
 
 
 /*
+ * Reads `count` entries of unsigned *little-endian* 16-bit values from the
+ * `file`, and writes them to `dest`. Returns the count.
+ */
+size_t
+ReadUint16LE(FILE *file, size_t count, uint16_t *dest)
+{
+	size_t rv = fread(dest, sizeof(uint16_t), count, file);
+	/* XXX do something to guarantee it was little-endian */
+	return rv;
+}
+
+
+/*
  * Reads `count` entries of unsigned *big-endian* 32-bit values from the
  * `file`, and writes them to `dest`. Returns the count.
  */
@@ -91,5 +115,18 @@ ReadUint32(FILE *file, size_t count, uint32_t *dest)
 {
 	size_t rv = fread(dest, sizeof(uint32_t), count, file);
 	*dest = htonl(*dest);
+	return rv;
+}
+
+
+/*
+ * Reads `count` entries of unsigned *little-endian* 32-bit values from the
+ * `file`, and writes them to `dest`. Returns the count.
+ */
+size_t
+ReadUint32LE(FILE *file, size_t count, uint32_t *dest)
+{
+	size_t rv = fread(dest, sizeof(uint32_t), count, file);
+	/* XXX do something to guarantee it was little-endian */
 	return rv;
 }
