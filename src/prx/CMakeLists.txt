@@ -4,16 +4,26 @@ project(lunapurpura)
 add_library(lpprx STATIC
   prx.c
   prx.h
-  prxindexentry.c
-  prxindexentry.h
   prxmember.c
   prxmember.h
 )
 
-add_executable(prxread
-  prxreader.c
-  prxreader.h
-  prxreadmain.c
+target_include_directories(lpprx PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(prxread lpprx lputil)
+target_link_libraries(lpprx lputil)
+
+########## ########## ##########
+
+add_executable(prx
+  main.c
+)
+
+target_include_directories(prx PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/../lputil
+)
+
+target_link_libraries(prx lpprx lputil)
