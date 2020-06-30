@@ -39,6 +39,24 @@ target_link_libraries(luaprd ${LIBLUAJIT} lpprd lputil)
 
 ########## ########## ##########
 
+add_library(luaprx SHARED
+  luaprx.c
+)
+
+target_include_directories(luaprx PUBLIC
+  ${LUAJIT_INCLUDEDIR}
+)
+
+target_include_directories(luaprx PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/../prx
+  ${CMAKE_CURRENT_LIST_DIR}/../lputil
+)
+
+target_link_libraries(luaprx ${LIBLUAJIT} lpprx lputil)
+
+
+########## ########## ##########
+
 add_library(luaxpk SHARED
   luaxpk.c
 )

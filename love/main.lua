@@ -4,6 +4,7 @@ local serpent = require("serpent")
 
 local CLU = require("luaclu")
 local PRD = require("luaprd")
+local PRX = require("luaprx")
 local XPK = require("luaxpk")
 
 --------- --------- ---------
@@ -203,9 +204,19 @@ function love.load()
 
 	print(string.format("CLU -> %s", serpent.line(CLU)))
 	print(string.format("PRD -> %s", serpent.line(PRD)))
+	print(string.format("PRX -> %s", serpent.line(PRX)))
 	print(string.format("XPK -> %s", serpent.line(XPK)))
 
 	love.graphics.setBackgroundColor(127/255, 23/255, 151/255) -- "certain purple"
+
+	--[[Testing PRX functionality]]
+	local prx = PRX.NewFromFile("__RESOURCE/Global.PRX")
+	print(string.format("%s", serpent.line(prx)))
+	for i = 1, PRX.NEntries(prx), 1 do
+		local member = PRX.MemberAtIndex(prx, i)
+		 print(string.format("-> MEMBER internal_id=%d format=%s name=%s",
+			member.internal_id, member.filetype, member.name))
+	end
 
 	CURRENT_SCENE = nil
 
