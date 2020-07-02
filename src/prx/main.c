@@ -21,12 +21,18 @@
 
 #define PARSE_OPTIONS_OK (-1)
 
+enum PRXToolAction {
+	PRX_TOOL_ACTION_NONE,
+	PRX_TOOL_ACTION_LIST,
+	PRX_TOOL_ACTION_EXTRACT,
+};
+
 static int parse_options(int *argc, char **argv[]);
 static void usage(void);
 
 static char *path = NULL;
 static bool verbose = false;
-static bool want_extract = false;
+static enum PRXToolAction action = PRX_TOOL_ACTION_NONE;
 static int which_asset = -1;
 static bool want_all_assets = false;
 
@@ -48,50 +54,60 @@ main(int argc, char *argv[])
 
 	LPStatus status;
 
-	PRX *prx = PRX_NewFromFile(path, want_extract, &status);
+	PRX *prx = PRX_NewFromFile(path, (action == PRX_TOOL_ACTION_EXTRACT), &status);
 
 	if (!prx) {
 		warnx("error: %s: %s", path, LPStatusString(status));
 		goto fail;
 	}
 
-	if (want_extract) {
-		/*
-		 * Extract one OR all of the members in the archive, depending on the
-		 * command-line options.
-		 */
-		int min_i;
-		int max_i;
-		min_i = want_all_assets ? 1 : which_asset;
-		max_i = want_all_assets ? prx->n_entries-1 : which_asset;
+	switch (action) {
+	case PRX_TOOL_ACTION_EXTRACT:
+		{
+			/*
+			 * Extract one OR all of the members in the archive, depending on the
+			 * command-line options.
+			 */
+			int min_i;
+			int max_i;
+			min_i = want_all_assets ? 1 : which_asset;
+			max_i = want_all_assets ? prx->n_entries-1 : which_asset;
 
-		for (int i = min_i; i <= max_i; i++) {
-			PRXMember *member = prx->members[i];
-			const int TOTAL_FILENAME_LEN  = PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN;
-			char total_filename[TOTAL_FILENAME_LEN];
-			snprintf(total_filename, TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
+			for (int i = min_i; i <= max_i; i++) {
+				PRXMember *member = prx->members[i];
+				const int TOTAL_FILENAME_LEN  = PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN;
+				char total_filename[TOTAL_FILENAME_LEN];
+				snprintf(total_filename, TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
 
-			FILE *fp = fopen(total_filename, "w");
-			if (!fp) {
-				warnx("unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
-				goto fail;
-			}
-			fwrite(member->data, member->size, 1, fp);
-			fclose(fp);
+				FILE *fp = fopen(total_filename, "w");
+				if (!fp) {
+					warnx("unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
+					goto fail;
+				}
+				fwrite(member->data, member->size, 1, fp);
+				fclose(fp);
 
-			if (verbose) {
-				printf("x\t%s\n", total_filename);
+				if (verbose) {
+					printf("x\t%s\n", total_filename);
+				}
 			}
 		}
-	} else {
-		/* Merely print a list of all members. */
-		printf(">> %d entries:\n", prx->n_entries);
-		for (int i = 0; i < prx->n_entries; i++) {
-			PRXMember *member = prx->members[i];
-			printf("%-6d%-18s%-6s%-8d%-8d\n",
-				member->internal_id-1, member->name, member->filetype, member->identifier,
-				member->size);
+		break;
+	case PRX_TOOL_ACTION_LIST:
+		{
+			/* Merely print a list of all members. */
+			printf(">> %d entries:\n", prx->n_entries);
+			for (int i = 0; i < prx->n_entries; i++) {
+				PRXMember *member = prx->members[i];
+				printf("%-6d%-18s%-6s%-8d%-8d\n",
+					member->internal_id-1, member->name, member->filetype, member->identifier,
+					member->size);
+			}
 		}
+		break;
+	case PRX_TOOL_ACTION_NONE: /* NOTREACHED */
+		/* OK */
+		break;
 	}
 
 	PRX_Free(prx);
@@ -108,7 +124,7 @@ parse_options(int *argc, char **argv[])
 {
 	int ch;
 
-	while ((ch = getopt(*argc, *argv, "ahn:vx")) != -1) {
+	while ((ch = getopt(*argc, *argv, "ahn:tvx")) != -1) {
 		switch (ch) {
 		case 'a':
 			want_all_assets = true;
@@ -120,11 +136,14 @@ parse_options(int *argc, char **argv[])
 		case 'n':
 			which_asset = atoi(optarg);
 			break;
+		case 't':
+			action = PRX_TOOL_ACTION_LIST;
+			break;
 		case 'v':
 			verbose = true;
 			break;
 		case 'x':
-			want_extract = true;
+			action = PRX_TOOL_ACTION_EXTRACT;
 			break;
 		case '?':
 			/* FALLTHROUGH */
@@ -141,12 +160,17 @@ parse_options(int *argc, char **argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (want_extract && !want_all_assets && which_asset < 0) {
+	if (action == PRX_TOOL_ACTION_NONE) {
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	if (want_extract && want_all_assets && which_asset >= 0) {
+	if (action == PRX_TOOL_ACTION_EXTRACT && !want_all_assets && which_asset < 0) {
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if (action == PRX_TOOL_ACTION_EXTRACT && want_all_assets && which_asset >= 0) {
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -163,9 +187,10 @@ usage(void)
 	const char *progname = getprogname();
 	warnx(
 		"usage: %s [options ...] [file]\n"
-			"\t%s file\n"
-			"\t%s -x [-n ID | -a] file\n"
-			"\t%s -h",
-		progname, progname, progname, progname
+			"\t%s -t <file>               List members\n"
+			"\t%s -x [-v] -n <ID> <file>  Extract a single member\n"
+			"\t%s -x [-v] -a <file>       Extract all members\n"
+			"\t%s -h                      Show this help message",
+		progname, progname, progname, progname, progname
 	);
 }
