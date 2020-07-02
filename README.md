@@ -38,12 +38,12 @@ The following CMake configuration options are supported:
 - BOOL `LUNAPURPURA_DEBUG` -- Enable debug output
 - BOOL `LUNAPURPURA_BUILD_LUA_BINDINGS` -- Build the Lua 5.1 (or LuaJIT) bindings
 - BOOL `LUNAPURPURA_BUILD_MRUBY_BINDINGS` -- Build the mruby bindings
-- BOOL `LUNAPURPURA_XPK_PNG_SUPPORT` -- Add XPK-to-PNG conversion support
+- BOOL `LUNAPURPURA_PNG_SUPPORT` -- Enable conversion to PNG
 
 So, for example:
 
 ```
-$ cmake .. -DLUNAPURPURA_DEBUG=ON -DLUNAPURPURA_XPK_PNG_SUPPORT=OFF
+$ cmake .. -DLUNAPURPURA_DEBUG=ON -DLUNAPURPURA_PNG_SUPPORT=OFF
 ```
 
 If you turn on the Lua bindings, you need to also define the following:

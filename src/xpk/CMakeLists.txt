@@ -4,12 +4,6 @@ project(lunapurpura)
 # User-settable options.
 set(LUNAPURPURA_XPK_HACK ON CACHE BOOL "Enable a silly XPK hack")
 set(LUNAPURPURA_XPK_TRACE OFF CACHE BOOL "Add tracing output while decoding XPKs")
-set(LUNAPURPURA_XPK_PNG_SUPPORT ON CACHE BOOL "Add XPK->PNG output support")
-
-if(${LUNAPURPURA_XPK_PNG_SUPPORT})
-  message(STATUS "XPK->PNG support enabled")
-  find_package(PNG REQUIRED)
-endif()
 
 ########## ########## ##########
 
@@ -39,8 +33,8 @@ target_include_directories(lpxpk PRIVATE
 
 target_link_libraries(lpxpk lpclu lputil)
 
-if(${LUNAPURPURA_XPK_PNG_SUPPORT})
-  target_compile_options(lpxpk PUBLIC "-DLUNAPURPURA_XPK_PNG_SUPPORT" "${PNG_DEFINTIONS}")
+if(${LUNAPURPURA_PNG_SUPPORT})
+  target_compile_options(lpxpk PUBLIC "-DLUNAPURPURA_PNG_SUPPORT" "${PNG_DEFINTIONS}")
   target_link_libraries(lpxpk "${PNG_LIBRARIES}")
 endif()
 
@@ -58,7 +52,7 @@ target_include_directories(xpk PRIVATE
 
 target_link_libraries(xpk lpxpk lpclu lputil)
 
-if(${LUNAPURPURA_XPK_PNG_SUPPORT})
-  target_compile_options(xpk PUBLIC "-DLUNAPURPURA_XPK_PNG_SUPPORT" "${PNG_DEFINTIONS}")
+if(${LUNAPURPURA_PNG_SUPPORT})
+  target_compile_options(xpk PUBLIC "-DLUNAPURPURA_PNG_SUPPORT" "${PNG_DEFINTIONS}")
   target_link_libraries(xpk "${PNG_LIBRARIES}")
 endif()

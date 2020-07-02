@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 #include <setjmp.h>
 #include <png.h>
 #endif
@@ -297,7 +297,7 @@ XPKDecoder_FreeRGBA(uint8_t *rgba)
 	free(rgba);
 }
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 LPStatus
 XPKDecoder_RGBAToPNG(const uint8_t *rgba, const XPKEntry *entry, const char *path)
 {
@@ -355,4 +355,4 @@ XPKDecoder_RGBAToPNG(const uint8_t *rgba, const XPKEntry *entry, const char *pat
 
 	return LUNAPURPURA_OK;
 }
-#endif /* LUNAPURPURA_XPK_PNG_SUPPORT */
+#endif /* LUNAPURPURA_PNG_SUPPORT */
