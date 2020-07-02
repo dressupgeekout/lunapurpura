@@ -19,7 +19,7 @@ pushd ${build_dir}
   cmake .. \
     -DLUNAPURPURA_BUILD_LUA_BINDINGS=${lua_bindings} \
     -DLUNAPURPURA_BUILD_MRUBY_BINDINGS=OFF \
-    -DLUNAPURPURA_XPK_PNG_SUPPORT=OFF
+    -DLUNAPURPURA_PNG_SUPPORT=OFF
 
   make "$@"
 

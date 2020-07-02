@@ -5,6 +5,7 @@ project(lunapurpura)
 set(LUNAPURPURA_DEBUG ON CACHE BOOL "Enable debug output")
 set(LUNAPURPURA_BUILD_LUA_BINDINGS OFF CACHE BOOL "Build the Lua/LuaJIT bindings")
 set(LUNAPURPURA_BUILD_MRUBY_BINDINGS OFF CACHE BOOL "Build the mruby bindings")
+set(LUNAPURPURA_PNG_SUPPORT ON CACHE BOOL "Enable conversion to PNG")
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
   message(STATUS "Lua bindings enabled")
@@ -16,6 +17,11 @@ if(${LUNAPURPURA_BUILD_MRUBY_BINDINGS})
   message(STATUS "mruby bindings enabled")
   set(MRUBY_INCLUDEDIR "" CACHE PATH "Location of mruby's header files")
   set(MRUBY_LIBDIR "" CACHE PATH "Location of mruby's library")
+endif()
+
+if(${LUNAPURPURA_PNG_SUPPORT})
+  message(STATUS "PNG support enabled")
+  find_package(PNG REQUIRED)
 endif()
 
 # Global build parameters.

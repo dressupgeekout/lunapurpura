@@ -51,7 +51,7 @@ typedef struct XPKDecoder XPKDecoder;
 uint8_t *XPKDecoder_Decode(XPKDecoder *decoder, XPKEntry *entry, LPStatus *status);
 void XPKDecoder_FreeRGBA(uint8_t *rgba);
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 LPStatus XPKDecoder_RGBAToPNG(const uint8_t *rgba, const XPKEntry *entry, const char *path);
 #endif
 

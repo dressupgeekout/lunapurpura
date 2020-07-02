@@ -24,7 +24,7 @@ static void usage(void);
 static void
 usage(void)
 {
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 	const char *png_support = "[-p]";
 #else
 	const char *png_support = "";
@@ -41,7 +41,7 @@ main(int argc, char *argv[])
 	char *clu_path = NULL;
 	char *out_path = NULL;
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 	bool want_png = false;
 	const char *opts =  "c:o:ph";
 #else
@@ -60,7 +60,7 @@ main(int argc, char *argv[])
 		case 'o':
 			out_path = optarg;
 			break;
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 		case 'p':
 			want_png = true;
 			break;
@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 		goto fail;
 	}
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 	if (out_path && !want_png) {
 #else
 	if (out_path) {
@@ -129,7 +129,7 @@ main(int argc, char *argv[])
 		fclose(out_f);
 	}
 
-#ifdef LUNAPURPURA_XPK_PNG_SUPPORT
+#ifdef LUNAPURPURA_PNG_SUPPORT
 	if (out_path && want_png) {
 		if ((status = XPKDecoder_RGBAToPNG(rgba, entry, out_path)) != LUNAPURPURA_OK) {
 			warnx("couldn't write PNG!: %s", LPStatusString(status));
