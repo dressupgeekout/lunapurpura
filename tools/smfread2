@@ -1,0 +1,59 @@
+#!/usr/bin/env ruby
+
+smffile_path = ARGV.shift
+
+if not smffile_path
+  $stderr.puts("expected a SMF file")
+  exit 1
+end
+
+smffile = File.open(File.expand_path(smffile_path), "r")
+
+SMF_MAGIC = [173, 126, 121, 0]
+
+magic = smffile.read(4).unpack("C*")
+
+if magic != SMF_MAGIC
+  $stderr.puts("bad magic: expected #{SMF_MAGIC.inspect}, got #{magic.inspect}")
+  smffile.close
+  exit 1
+end
+
+string_a = ""
+
+until smffile.tell >= 816
+  a, b, c, d = smffile.read(4).unpack("C*")
+  word = [a, b, c, d]
+  p word
+
+  if word == [0x0, 0x0, 0x7F, 0xFE]
+    puts; puts
+    puts ">> MAGENTAMARK"
+  elsif a == 0x30
+    raise if [c, d] != [0x0, 0x8F]
+    if b == 0x03
+      string_a = smffile.read(4).unpack("Z*")[0]
+    end
+  else
+    color = ""
+    blurb = nil
+
+    if a == 0x21 
+      color = "ORANGE" 
+    end
+
+    if a == 0x76
+      color = "YELLOW" 
+      blurb = word.pack("C*")
+    end
+
+    puts "ftell=#{smffile.tell} #{color} #{[a, b, c, d].inspect} #{blurb.inspect if blurb}"
+  end
+end
+
+smffile.close
+
+puts ""
+puts "*"*50
+puts "WHAT WE LEARNED:"
+puts "string_a = #{string_a.inspect}"
