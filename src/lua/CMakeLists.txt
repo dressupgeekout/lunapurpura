@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(lunapurpura)
 
-find_library(LIBLUAJIT NAMES luajit PATHS ${LUAJIT_LIBDIR} REQUIRED)
+find_library(LIBLUA NAMES lua luajit PATHS ${LUA_LIBDIR} NO_DEFAULT_PATH)
 
 ########## ########## ##########
 
@@ -10,7 +10,7 @@ add_library(luaclu SHARED
 )
 
 target_include_directories(luaclu PUBLIC
-  ${LUAJIT_INCLUDEDIR}
+  ${LUA_INCLUDEDIR}
 )
 
 target_include_directories(luaclu PRIVATE
@@ -18,7 +18,7 @@ target_include_directories(luaclu PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(luaclu ${LIBLUAJIT} lpclu lputil)
+target_link_libraries(luaclu ${LIBLUA} lpclu lputil)
 
 ########## ########## ##########
 
@@ -27,7 +27,7 @@ add_library(luaprd SHARED
 )
 
 target_include_directories(luaprd PUBLIC
-  ${LUAJIT_INCLUDEDIR}
+  ${LUA_INCLUDEDIR}
 )
 
 target_include_directories(luaprd PRIVATE
@@ -35,7 +35,7 @@ target_include_directories(luaprd PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(luaprd ${LIBLUAJIT} lpprd lputil)
+target_link_libraries(luaprd ${LIBLUA} lpprd lputil)
 
 ########## ########## ##########
 
@@ -44,7 +44,7 @@ add_library(luaprx SHARED
 )
 
 target_include_directories(luaprx PUBLIC
-  ${LUAJIT_INCLUDEDIR}
+  ${LUA_INCLUDEDIR}
 )
 
 target_include_directories(luaprx PRIVATE
@@ -52,7 +52,7 @@ target_include_directories(luaprx PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(luaprx ${LIBLUAJIT} lpprx lputil)
+target_link_libraries(luaprx ${LIBLUA} lpprx lputil)
 
 
 ########## ########## ##########
@@ -62,7 +62,7 @@ add_library(luaxpk SHARED
 )
 
 target_include_directories(luaxpk PUBLIC
-  ${LUAJIT_INCLUDEDIR}
+  ${LUA_INCLUDEDIR}
 )
 
 target_include_directories(luaxpk PRIVATE
@@ -71,4 +71,4 @@ target_include_directories(luaxpk PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(luaxpk ${LIBLUAJIT} lpxpk lputil)
+target_link_libraries(luaxpk ${LIBLUA} lpxpk lputil)

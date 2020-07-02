@@ -36,13 +36,13 @@ $ make
 The following CMake configuration options are supported:
 
 - BOOL `LUNAPURPURA_DEBUG` -- Enable debug output
-- BOOL `LUNAPURPURA_BUILD_LUA_BINDINGS` -- Build the LuaJIT bindings
+- BOOL `LUNAPURPURA_BUILD_LUA_BINDINGS` -- Build the Lua 5.1 (or LuaJIT) bindings
 - BOOL `LUNAPURPURA_BUILD_MRUBY_BINDINGS` -- Build the mruby bindings
 
 If you turn on the Lua bindings, you need to also define the following:
 
-- PATH `LUAJIT_INCLUDEDIR` -- Location of LuaJIT's header files
-- PATH `LUAJIT_LIBDIR` -- Location of LuaJIT's library
+- PATH `LUA_INCLUDEDIR` -- Location of Lua 5.1/LuaJIT's header files
+- PATH `LUA_LIBDIR` -- Location of Lua 5.1/LuaJIT's library
 
 If you turn on the mruby bindings, you need to also define the following:
 
