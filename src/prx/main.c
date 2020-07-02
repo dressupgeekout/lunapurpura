@@ -138,6 +138,7 @@ parse_options(int *argc, char **argv[])
 			break;
 		case 't':
 			action = PRX_TOOL_ACTION_LIST;
+			break;
 		case 'v':
 			verbose = true;
 			break;
