@@ -13,12 +13,10 @@
 
 static int luaclu_NewFromFile(lua_State *L);
 static int luaclu_ColorAtIndex(lua_State *L);
-static int luaclu_GetName(lua_State *L);
 
 static const luaL_Reg functions[] = {
 	{"NewFromFile", luaclu_NewFromFile},
 	{"ColorAtIndex", luaclu_ColorAtIndex},
-	{"GetName", luaclu_GetName},
 	{NULL, NULL}
 };
 
@@ -60,20 +58,6 @@ luaclu_ColorAtIndex(lua_State *L)
 	lua_pushinteger(L, color[1]);
 	lua_pushinteger(L, color[2]);
 	return 3;
-}
-
-
-/*
- * name = CLU.GetName(clu)
- */
-static int
-luaclu_GetName(lua_State *L)
-{
-	luaL_checkudata(L, 1, CLU_TYPE_NAME);
-	CLU **clu = lua_touserdata(L, 1);
-	lua_pop(L, 1);
-	lua_pushstring(L, (*clu)->name);
-	return 1;
 }
 
 /* ********** */

@@ -19,7 +19,6 @@ extern uint8_t CLU_MAGIC[CLU_MAGIC_LEN];
 
 struct CLU {
 	uint8_t array[CLU_NELEMENTS][3];
-	char name[16];
 };
 typedef struct CLU CLU;
 

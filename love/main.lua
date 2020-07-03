@@ -31,7 +31,6 @@ local function draw_clus()
 	end
 
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.print(CLU.GetName(clus[current_clu_index]), 0, 0)
 
 	if mouseover_entry then
 		love.graphics.setColor(1, 1, 1, 1)
