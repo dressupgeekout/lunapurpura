@@ -74,7 +74,7 @@ main(int argc, char *argv[])
 			max_i = want_all_assets ? prx->n_entries-1 : which_asset;
 
 			for (int i = min_i; i <= max_i; i++) {
-				PRXMember *member = prx->members[i];
+				PRXMember *member = prx->members[i-1];
 				const int TOTAL_FILENAME_LEN  = PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN;
 				char total_filename[TOTAL_FILENAME_LEN];
 				snprintf(total_filename, TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
