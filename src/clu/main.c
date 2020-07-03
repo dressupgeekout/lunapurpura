@@ -16,16 +16,24 @@
 
 static void usage(void);
 
+static char *progname = NULL;
+
 static void
 usage(void)
 {
-	warnx("usage: %s file", getprogname());
+	warnx("usage: %s file", progname);
 }
 
 
 int
 main(int argc, char *argv[])
 {
+#ifdef LUNAPURPURA_HAVE_GETPROGNAME
+	progname = (char *)getprogname();
+#else
+	progname = argv[0];
+#endif
+
 	int ch;
 
 	while ((ch = getopt(argc, argv, "h")) != -1) {

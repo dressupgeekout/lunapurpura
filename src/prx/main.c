@@ -30,6 +30,7 @@ enum PRXToolAction {
 static int parse_options(int *argc, char **argv[]);
 static void usage(void);
 
+static char *progname = NULL;
 static char *path = NULL;
 static bool verbose = false;
 static enum PRXToolAction action = PRX_TOOL_ACTION_NONE;
@@ -41,6 +42,12 @@ static bool want_all_assets = false;
 int
 main(int argc, char *argv[])
 {
+#ifdef LUNAPURPURA_HAVE_GETPROGNAME
+	progname = (char *)getprogname();
+#else
+	progname = argv[0];
+#endif
+
 	int rv;
 
 	if (argc < 2) {
@@ -184,7 +191,6 @@ parse_options(int *argc, char **argv[])
 static void
 usage(void)
 {
-	const char *progname = getprogname();
 	warnx(
 		"usage: %s [options ...] [file]\n"
 			"\t%s -t <file>               List members\n"

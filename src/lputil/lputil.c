@@ -10,9 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __APPLE__
 #include <arpa/inet.h> /* for htons(3) et al */
-#endif
 
 #include "lputil.h"
 
@@ -27,6 +25,7 @@ LPStatusString(const LPStatus status)
 		case LUNAPURPURA_ERROR: return "Error"; break;
 		case LUNAPURPURA_CANTOPENFILE: return "Can't open file"; break;
 		case LUNAPURPURA_BADMAGIC: return "Bad magic"; break;
+		default: return "";
 	}
 }
 

@@ -10,9 +10,17 @@
 
 static void usage(void);
 
+static char *progname = NULL;
+
 int
 main(int argc, char *argv[])
 {
+#ifdef LUNAPURPURA_HAVE_GETPROGNAME
+	progname = (char *)getprogname();
+#else
+	progname = argv[0];
+#endif
+
 	if (argc <= 1) {
 		usage();
 		return EXIT_FAILURE;
@@ -37,5 +45,5 @@ main(int argc, char *argv[])
 static void
 usage(void)
 {
-	warnx("usage: %s file", getprogname());
+	warnx("usage: %s file", progname);
 }

@@ -19,6 +19,8 @@
 
 static void usage(void);
 
+static char *progname = NULL;
+
 /* ********** */
 
 static void
@@ -29,7 +31,7 @@ usage(void)
 #else
 	const char *png_support = "";
 #endif
-	warnx("usage: %s [-h] %s -c clu -o output file", getprogname(), png_support);
+	warnx("usage: %s [-h] %s -c clu -o output file", progname, png_support);
 }
 
 /* ********** */
@@ -37,6 +39,12 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+#ifdef LUNAPURPURA_HAVE_GETPROGNAME
+	progname = (char *)getprogname();
+#else
+	progname = argv[0];
+#endif
+
 	int ch;
 	char *clu_path = NULL;
 	char *out_path = NULL;
