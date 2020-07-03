@@ -27,6 +27,7 @@ LPStatusString(const LPStatus status)
 		case LUNAPURPURA_ERROR: return "Error"; break;
 		case LUNAPURPURA_CANTOPENFILE: return "Can't open file"; break;
 		case LUNAPURPURA_BADMAGIC: return "Bad magic"; break;
+		default: return "";
 	}
 }
 
