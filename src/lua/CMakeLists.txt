@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(lunapurpura)
 
-find_library(LIBLUA NAMES lua luajit PATHS ${LUA_LIBDIR} NO_DEFAULT_PATH)
+find_library(LIBLUA NAMES lua luajit luajit-5.1 PATHS ${LUA_LIBDIR} NO_DEFAULT_PATH)
 
 ########## ########## ##########
 
