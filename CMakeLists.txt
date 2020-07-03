@@ -24,6 +24,13 @@ if(${LUNAPURPURA_PNG_SUPPORT})
   find_package(PNG REQUIRED)
 endif()
 
+include(CheckFunctionExists)
+check_function_exists(getprogname LUNAPURPURA_HAVE_GETPROGNAME)
+
+if(${LUNAPURPURA_HAVE_GETPROGNAME})
+  add_definitions(-DLUNAPURPURA_HAVE_GETPROGNAME)
+endif()
+
 # Global build parameters.
 set(CMAKE_C_STANDARD 11)
 add_compile_options(-Wall -g)
