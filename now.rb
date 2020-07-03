@@ -33,8 +33,34 @@ $stdout.puts(f.read(0x00008000)) # 10
 f.seek(1250835, :SET)
 $stdout.puts(f.read(0x0000420C))
 
-
-
-
 f.close
 
+
+len = 0x00008000
+
+b = [
+  816,
+  112224,
+  246308,
+  349605,
+  533166,
+  648753,
+  793086,
+  882320,
+  1035220,
+  1139250,
+]
+
+b.each_cons(2) { |a, b| $stderr.puts b - (a + len) }
+
+
+
+#f.seek(1250835, :SET)
+#$stdout.puts(f.read(0x0000420C))
+
+
+__END__
+
+1317194 total
+
+1316378 total (if we EXCLUDE header)
