@@ -7,7 +7,7 @@
 #ifndef LUNAPURPURA_PRXMEMBER_H
 #define LUNAPURPURA_PRXMEMBER_H
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include "prx.h"
 #include "prxmember.h"

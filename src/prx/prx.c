@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <lpstatus.h>
 #include <lputil.h>
 
 #include "prx.h"

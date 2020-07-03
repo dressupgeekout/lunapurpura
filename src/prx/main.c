@@ -12,7 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include "prx.h"
 #include "prxmember.h"

@@ -7,7 +7,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include <prx.h>
 #include <prxmember.h>
