@@ -37,7 +37,6 @@ CLU_NewFromFile(const char *path, LPStatus *status)
 	}
 
 	CLU *clu = malloc(sizeof(CLU)); /* XXX check for alloc error */
-	snprintf(clu->name, sizeof(clu->name), "%s", path);
 	uint8_t *cluptr = NULL;
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
