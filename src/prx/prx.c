@@ -42,12 +42,19 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 	fseek(fp, 137L, SEEK_CUR);
 
 	ReadUint16LE(fp, 1, &prx->n_entries);
-	prx->n_entries++; /* +1 because of the first "dummy entry" */
-
 	fseek(fp, 4L, SEEK_CUR); /* Number of entries, again? */
 
 	prx->members = calloc(prx->n_entries, sizeof(PRXMember));
 
+	/*
+	 * Purposefully skip over the zeroeth entry (which has internal_id of 1),
+	 * it's always a "dummy" entry which serves little purpose.
+	 */
+	fseek(fp, 24L, SEEK_CUR);
+
+	/*
+	 * OK now we *finally* can access the individual archive members.
+	 */
 	for (int i = 0; i < prx->n_entries; i++) {
 		LPStatus new_member_status;
 		PRXMember *member = PRXMember_New(&new_member_status);
@@ -64,7 +71,11 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 		 */
 		uint16_t internal_id;
 		ReadUint16LE(fp, 1, &internal_id);
-		PRXMember_SetInternalId(member, internal_id);
+		if (internal_id == 0) {
+			PRXMember_SetInternalId(member, prx->n_entries+1);
+		} else {
+			PRXMember_SetInternalId(member, internal_id);
+		}
 
 		fseek(fp, 6L, SEEK_CUR);
 
@@ -102,7 +113,7 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 	 * Also, the offset brings us to the start of the data, but that skips
 	 * past the filename!  So that's why we rewind a little.
 	 */
-	for (int i = 1; i < prx->n_entries; i++) {
+	for (int i = 0; i < prx->n_entries; i++) {
 		uint32_t abs_offset = PRX_AbsoluteOffsetForMember(prx, i);
 		fseek(fp, abs_offset, SEEK_SET);
 		fseek(fp, (long)-(PRXMEMBER_NAME_LEN+6), SEEK_CUR); /* Rewind to get the filename */
