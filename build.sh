@@ -15,7 +15,7 @@ fi
 mkdir -p ${build_dir}
 mkdir -p ${love_dir}
 
-pushd ${build_dir}
+cd ${build_dir}
   cmake .. \
     -DLUNAPURPURA_BUILD_LUA_BINDINGS=${lua_bindings} \
     -DLUNAPURPURA_BUILD_MRUBY_BINDINGS=OFF \
@@ -28,4 +28,4 @@ pushd ${build_dir}
       cp -v ./src/lua/liblua${lib}.dylib ../${love_dir}/lua${lib}.so
     done
   fi
-popd
+cd -
