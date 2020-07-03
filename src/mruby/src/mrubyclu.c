@@ -5,7 +5,7 @@
 #include <mruby.h>
 #include <mruby/numeric.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include <clu.h>
 

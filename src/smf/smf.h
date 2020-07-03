@@ -7,7 +7,7 @@
 #ifndef LUNAPURPURA_SMF_H
 #define LUNAPURPURA_SMF_H
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #define SMF_MAGIC_LEN 4
 

@@ -14,7 +14,22 @@
 #include <arpa/inet.h> /* for htons(3) et al */
 #endif
 
-#include "util.h"
+#include "lputil.h"
+
+/*
+ * Returns a string representation of the given LPStatus.
+ */
+const char *
+LPStatusString(const LPStatus status)
+{
+	switch (status) {
+		case LUNAPURPURA_OK: return "OK"; break;
+		case LUNAPURPURA_ERROR: return "Error"; break;
+		case LUNAPURPURA_CANTOPENFILE: return "Can't open file"; break;
+		case LUNAPURPURA_BADMAGIC: return "Bad magic"; break;
+	}
+}
+
 
 /*
  * The FILE pointer is expected to have already been rewinded to the

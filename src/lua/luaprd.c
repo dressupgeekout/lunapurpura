@@ -5,7 +5,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include <prd.h>
 

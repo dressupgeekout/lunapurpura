@@ -7,7 +7,7 @@
 #ifndef LUNAPURPURA_XPKDECODER_H
 #define LUNAPURPURA_XPKDECODER_H
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include <clu.h>
 

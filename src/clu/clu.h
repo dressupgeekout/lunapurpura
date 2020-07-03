@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #define CLU_TYPE "CLU"
 #define CLU_NELEMENTS 256

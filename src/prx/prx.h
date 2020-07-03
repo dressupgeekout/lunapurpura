@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <lpstatus.h>
+#include <lputil.h>
 
 #include "prxmember.h"
 

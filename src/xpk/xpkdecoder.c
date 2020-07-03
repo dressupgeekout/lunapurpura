@@ -13,7 +13,6 @@
 #include <png.h>
 #endif
 
-#include <lpstatus.h>
 #include <lputil.h>
 
 #include <clu.h>
