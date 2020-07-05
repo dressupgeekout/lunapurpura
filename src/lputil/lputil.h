@@ -11,11 +11,15 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef LUNAPURPURA_TARGET_WINDOWS
-#include "getopt.h"
-#else
-#include <unistd.h>
-#endif
+/*
+ * The idea is that you should be able to #include ONLY this file, and
+ * you'll have everything you need in order to use LPGetopt().
+*/
+extern int optind;
+extern int optopt;
+extern int opterr;
+extern char *optarg;
+extern int getopt(int nargc, char * const *nargv, const char *options);
 
 enum LPStatus {
 	LUNAPURPURA_OK,
