@@ -10,7 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <arpa/inet.h> /* for htons(3) et al */
+/* for htons(3) et al */
+#ifdef LUNAPURPURA_TARGET_WINDOWS
+#include <WinSock2.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 #include "lputil.h"
 
