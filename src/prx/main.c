@@ -5,12 +5,17 @@
  */
 
 #include <err.h>
-#include <sys/errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifdef __APPLE__
+#include <sys/errno.h>
+#else
+#include <errno.h>
+#endif
 
 #include <lputil.h>
 
