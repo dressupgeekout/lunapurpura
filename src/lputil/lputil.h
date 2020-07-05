@@ -25,6 +25,10 @@ enum LPStatus {
 };
 typedef enum LPStatus LPStatus;
 
+void LPLog(const char *subsystem, const char *fmt, ...);
+void LPWarn(const char *subsystem, const char *fmt, ...);
+void LPDebug(const char *subsystem, const char *fmt, ...);
+
 int LPGetopt(int nargc, char * const *nargv, const char *options);
 const char *LPStatusString(const LPStatus status);
 bool ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len);

@@ -4,7 +4,6 @@
 * This file is part of Luna Purpura.
 */
 
-#include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

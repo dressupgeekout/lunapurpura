@@ -15,6 +15,8 @@
 
 #include "prxmember.h"
 
+#define LP_SUBSYSTEM_PRX "prx"
+
 #define PRX_MAGIC 1
 
 struct PRX {

@@ -4,7 +4,6 @@
  * This file is part of Luna Purpura.
  */
 
-#include <err.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -77,7 +76,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 		rv = ReadUint8(entry->xpk->file, 1, &byte);
 
 		if (!rv) {
-			warnx("couldn't ReadUint8");
+			LPWarn(LP_SUBSYSTEM_XPK, "couldn't ReadUint8");
 			*status = LUNAPURPURA_ERROR;
 			return NULL;
 		}
@@ -94,7 +93,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 			rgba_i = (d->cur_y * entry->width * 4) + (d->cur_x * 4);
 			color = CLU_ColorAtIndex(entry->xpk->clu, byte);
 #ifdef LUNAPURPURA_XPK_TRACE
-			warnx("(writing color %d)", byte);
+			LPWarn(LP_SUBSYSTEM_XPK, "(writing color %d)", byte);
 #endif
 			SET_COLOR(rgba, rgba_i, color[0], color[1], color[2]);
 			d->cur_x++;
@@ -106,7 +105,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 				rgba_i = (d->cur_y * entry->width * 4) + (d->cur_x * 4);
 				color = CLU_ColorAtIndex(entry->xpk->clu, byte);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("(writing %d reps of color %d)", d->n_reps, byte);
+					LPWarn(LP_SUBSYSTEM_XPK, "(writing %d reps of color %d)", d->n_reps, byte);
 #endif
 				for (; d->n_reps > 0; d->n_reps--) {
 					SET_COLOR(rgba, rgba_i, color[0], color[1], color[2]);
@@ -125,7 +124,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							ReadUint8(entry->xpk->file, 1 , &byte);
 							d->n_reps = byte;
 #ifdef LUNAPURPURA_XPK_TRACE
-							warnx("XPKINST_RLENEXT %d", byte);
+							LPWarn(LP_SUBSYSTEM_XPK, "XPKINST_RLENEXT %d", byte);
 #endif
 							break;
 						case XPKINST_REPEAT_END:
@@ -136,7 +135,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 								if (d->repeat > 0) {
 									fseek(entry->xpk->file, d->repeat_loc, SEEK_SET);
 #ifdef LUNAPURPURA_XPK_TRACE
-									warnx("REPEAT_END (%d remaining)", d->repeat);
+									LPWarn(LP_SUBSYSTEM_XPK, "REPEAT_END (%d remaining)", d->repeat);
 #endif
 								} else {
 									d->repeat_loc = 0L;
@@ -147,7 +146,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							d->repeat = argument;
 							d->repeat_loc = ftell(entry->xpk->file);
 #ifdef LUNAPURPURA_XPK_TRACE
-						warnx("REPEAT %d", argument);
+						LPWarn(LP_SUBSYSTEM_XPK, "REPEAT %d", argument);
 #endif
 						}
 					}
@@ -156,45 +155,45 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					if (argument) {
 						d->cur_x += argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-						warnx("XSKIP %d", argument);
+						LPWarn(LP_SUBSYSTEM_XPK, "XSKIP %d", argument);
 #endif
 					} else {
 						ReadUint16(entry->xpk->file, 1, &d->next_holder);
 						d->cur_x += d->next_holder;
 #ifdef LUNAPURPURA_XPK_TRACE
-						warnx("XSKIP %d", d->next_holder);
+						LPWarn(LP_SUBSYSTEM_XPK, "XSKIP %d", d->next_holder);
 #endif
 					}
 					break;
 				case XPKINST_BIGXSKIP:
 					d->cur_x += (16 + argument);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGXSKIP %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGXSKIP %d", 16+argument);
 #endif
 					break;
 				case XPKINST_RLE:
 					/* 0x40 should be safe to ignore */
 					d->n_reps = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("RLE %d", argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "RLE %d", argument);
 #endif
 					break;
 				case XPKINST_BIGRLE:
 					d->n_reps = (16 + argument);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGRLE %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGRLE %d", 16+argument);
 #endif
 					break;
 				case XPKINST_DIRECT:
 					d->direct_counter = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("DIRECT %d", argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "DIRECT %d", argument);
 #endif
 					break;
 				case XPKINST_BIGDIRECT:
 					d->direct_counter = (16 + argument);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGDIRECT %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGDIRECT %d", 16+argument);
 #endif
 					break;
 				case XPKINST_LINEREPEAT:
@@ -212,7 +211,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 								}
 								NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-								warnx("LINEREPEAT_END (%d remaining)", d->line_repeat);
+								LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT_END (%d remaining)", d->line_repeat);
 #endif
 								break;
 							}
@@ -221,7 +220,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							d->line_repeat = argument;
 							d->line_repeat_loc = ftell(entry->xpk->file);
 #ifdef LUNAPURPURA_XPK_TRACE
-							warnx("LINEREPEAT %d", argument);
+							LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT %d", argument);
 #endif
 						}
 					}
@@ -230,13 +229,13 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					if (argument) {
 						d->cur_x = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-						warnx("SETXNL %d", argument);
+						LPWarn(LP_SUBSYSTEM_XPK, "SETXNL %d", argument);
 #endif
 					} else {
 						ReadUint16(entry->xpk->file, 1, &d->next_holder);
 						d->cur_x = d->next_holder;
 #ifdef LUNAPURPURA_XPK_TRACE
-						warnx("SETXNL %d", d->next_holder);
+						LPWarn(LP_SUBSYSTEM_XPK, "SETXNL %d", d->next_holder);
 #endif
 					}
 					d->cur_y++;
@@ -245,39 +244,39 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					d->cur_x = (16 + argument);
 					d->cur_y++;
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGSETXNL %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGSETXNL %d", 16+argument);
 #endif
 					break;
 				case XPKINST_RLENL:
 					d->n_reps = argument;
 					NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("RLENL %d", argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "RLENL %d", argument);
 #endif
 					break;
 				case XPKINST_BIGRLENL:
 					d->n_reps = (16 + argument);
 					NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGRLENL %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGRLENL %d", 16+argument);
 #endif
 					break;
 				case XPKINST_DIRECTNL:
 					d->direct_counter = argument;
 					NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("DIRECTNL %d", argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", argument);
 #endif
 					break;
 				case XPKINST_BIGDIRECTNL:
 					d->direct_counter = (16 + argument);
 					NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-					warnx("BIGDIRECTNL %d", 16+argument);
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGDIRECTNL %d", 16+argument);
 #endif
 					break;
 				default:
-					warnx("?? unhandled XPK instruction: %X", byte);
+					LPWarn(LP_SUBSYSTEM_XPK, "?? unhandled XPK instruction: %X", byte);
 				}
 			}
 		}

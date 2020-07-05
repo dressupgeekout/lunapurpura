@@ -4,7 +4,6 @@
  * This file is part of Luna Purpura.
  */
 
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +19,7 @@ static char *progname = NULL;
 static void
 usage(void)
 {
-	warnx("usage: %s file", progname);
+	LPLog("usage: %s file", progname);
 }
 
 
@@ -61,7 +60,7 @@ main(int argc, char *argv[])
 
 	if (!clu) {
 		CLU_Free(clu);
-		warnx("%s: %s", clu_path, LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_CLU, "%s: %s", clu_path, LPStatusString(status));
 		return EXIT_FAILURE;
 	}
 

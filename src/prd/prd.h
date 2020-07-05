@@ -11,6 +11,8 @@
 
 #include "prdentry.h"
 
+#define LP_SUBSYSTEM_PRD "prd"
+
 #define PRD_MAGIC_LEN 4
 
 extern uint8_t PRD_MAGIC[PRD_MAGIC_LEN];

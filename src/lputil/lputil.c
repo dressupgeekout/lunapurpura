@@ -4,7 +4,7 @@
  * This file is part of Luna Purpura.
  */
 
-#include <err.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,6 +19,62 @@
 #endif
 
 #include "lputil.h"
+
+/* ********** */
+
+/* PRIVATE */
+static void lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, va_list ap);
+
+/* ********** */
+
+static void
+lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, va_list ap)
+{
+	static char real_fmt[256];
+	snprintf(real_fmt, sizeof(real_fmt), "%s: %s\n", subsystem, fmt);
+	vfprintf(stream, real_fmt, ap);
+	va_end(ap);
+}
+
+/* ********** */
+
+/*
+ * Unconditionally writes the formatted message to the standard output.
+ */
+void
+LPLog(const char *subsystem, const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	lp_msg_write(stdout, subsystem, fmt, ap);
+}
+
+
+/*
+ * Unconditionally writes the formatted message to the standard error.
+ */
+void
+LPWarn(const char *subsystem, const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+	lp_msg_write(stderr, subsystem, fmt, ap);
+}
+
+
+/*
+ * Prints a formatted message to stderr, but only if debug support is
+ * enabled in the first place.
+ */
+void
+LPDebug(const char *subsystem, const char *fmt, ...)
+{
+#ifdef LUNAPURPURA_DEBUG
+	va_list ap;
+	va_start(ap, fmt);
+	lp_msg_write(stderr, subsystem, fmt, ap);
+#endif
+}
 
 
 int
@@ -57,7 +113,7 @@ ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len)
 
 	uint8_t *our_magic = malloc(magic_len);
 	if (!our_magic) {
-		warn("(%s) Couldn't malloc our magic", __func__);
+		LPWarn("", "(%s) Couldn't malloc our magic", __func__);
 		fclose(file);
 		rv = false;
 		goto done;
@@ -67,16 +123,12 @@ ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len)
 
 	for (int i = 0; i < magic_len; i++) {
 		if (our_magic[i] != expected_magic[i]) {
-#ifdef LUNAPURPURA_DEBUG
-			warnx("(%s) %d != %d", __func__, our_magic[i], expected_magic[i]);
-#endif
+			LPDebug("", "(%s) %d != %d", __func__, our_magic[i], expected_magic[i]);
 			fclose(file);
 			rv = false;
 			goto done;
 		} else {
-#ifdef LUNAPURPURA_DEBUG
-			warnx("(%s) %d == %d", __func__, our_magic[i], expected_magic[i]);
-#endif
+			LPDebug("", "(%s) %d == %d", __func__, our_magic[i], expected_magic[i]);
 		}
 	}
 

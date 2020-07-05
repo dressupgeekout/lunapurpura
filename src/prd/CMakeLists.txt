@@ -21,6 +21,9 @@ add_executable(prd
   main.c
 )
 
-target_include_directories(prd PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(prd PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}
+  ${CMAKE_CURRENT_LIST_DIR}/../lputil
+)
 
 target_link_libraries(prd lpprd lputil)

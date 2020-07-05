@@ -2,7 +2,6 @@
  * smf
  */
 
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,7 +16,7 @@ static char *progname = NULL;
 static void
 usage(void)
 {
-	warnx("usage: %s [-h] file", progname);
+	LPWarn(LP_SUBSYSTEM_SMF, "usage: %s [-h] file", progname);
 }
 
 
@@ -59,7 +58,7 @@ main(int argc, char *argv[])
 	SMF *smf = SMF_NewFromFile(path, &status);
 
 	if (!smf) {
-		warnx("couldn't open SMF file %s: %s", path, LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_SMF, "couldn't open SMF file %s: %s", path, LPStatusString(status));
 		return EXIT_FAILURE;
 	}
 
