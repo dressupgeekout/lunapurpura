@@ -1,6 +1,9 @@
 *.swo
 *.swp
 .DS_Store
+.vs/**
 build/**
+CMakeSettings.json
 love/*.so
 love/RESOURCE/**
+out/**
