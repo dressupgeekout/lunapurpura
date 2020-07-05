@@ -4,13 +4,16 @@
  * This file is part of Luna Purpura.
  */
 
-#include <err.h>
-#include <sys/errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+
+#ifdef __APPLE__
+#include <sys/errno.h>
+#else
+#include <errno.h>
+#endif
 
 #include <lputil.h>
 
@@ -20,6 +23,8 @@
 /* ********** */
 
 #define PARSE_OPTIONS_OK (-1)
+
+#define PRX_TOTAL_FILENAME_LEN (PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN)
 
 enum PRXToolAction {
 	PRX_TOOL_ACTION_NONE,
@@ -64,7 +69,7 @@ main(int argc, char *argv[])
 	PRX *prx = PRX_NewFromFile(path, (action == PRX_TOOL_ACTION_EXTRACT), &status);
 
 	if (!prx) {
-		warnx("error: %s: %s", path, LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_PRX, "error: %s: %s", path, LPStatusString(status));
 		goto fail;
 	}
 
@@ -82,13 +87,12 @@ main(int argc, char *argv[])
 
 			for (int i = min_i; i <= max_i; i++) {
 				PRXMember *member = prx->members[i-1];
-				const int TOTAL_FILENAME_LEN  = PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN;
-				char total_filename[TOTAL_FILENAME_LEN];
-				snprintf(total_filename, TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
+				char total_filename[PRX_TOTAL_FILENAME_LEN];
+				snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
 
 				FILE *fp = fopen(total_filename, "w");
 				if (!fp) {
-					warnx("unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
+					LPWarn(LP_SUBSYSTEM_PRX, "unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
 					goto fail;
 				}
 				fwrite(member->data, member->size, 1, fp);
@@ -131,7 +135,7 @@ parse_options(int *argc, char **argv[])
 {
 	int ch;
 
-	while ((ch = getopt(*argc, *argv, "ahn:tvx")) != -1) {
+	while ((ch = LPGetopt(*argc, *argv, "ahn:tvx")) != -1) {
 		switch (ch) {
 		case 'a':
 			want_all_assets = true;
@@ -191,7 +195,8 @@ parse_options(int *argc, char **argv[])
 static void
 usage(void)
 {
-	warnx(
+	LPWarn(
+		LP_SUBSYSTEM_PRX,
 		"usage: %s [options ...] [file]\n"
 			"\t%s -t <file>               List members\n"
 			"\t%s -x [-v] -n <ID> <file>  Extract a single member\n"

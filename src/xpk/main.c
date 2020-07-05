@@ -2,11 +2,9 @@
  * xpk main
  */
 
-#include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <lputil.h>
 
@@ -31,7 +29,7 @@ usage(void)
 #else
 	const char *png_support = "";
 #endif
-	warnx("usage: %s [-h] %s -c clu -o output file", progname, png_support);
+	LPLog(LP_SUBSYSTEM_XPK, "usage: %s [-h] %s -c clu -o output file", progname, png_support);
 }
 
 /* ********** */
@@ -56,7 +54,7 @@ main(int argc, char *argv[])
 	const char *opts =  "c:o:h";
 #endif
 
-	while ((ch = getopt(argc, argv, opts)) != -1) {
+	while ((ch = LPGetopt(argc, argv, opts)) != -1) {
 		switch (ch) {
 		case 'c':
 			clu_path = optarg;
@@ -95,7 +93,7 @@ main(int argc, char *argv[])
 	CLU *clu = CLU_NewFromFile(clu_path, &status);
 
 	if (!clu) {
-		warnx("can't read CLU: %s: %s", clu_path, LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, LPStatusString(status));
 		return EXIT_FAILURE;
 	}
 
@@ -103,7 +101,7 @@ main(int argc, char *argv[])
 	XPK *xpk = XPK_NewFromFile(xpk_path, &status);
 
 	if (!xpk) {
-		warnx("%s: %s", xpk_path, LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_XPK, "%s: %s", xpk_path, LPStatusString(status));
 		return EXIT_FAILURE;
 	}
 
@@ -123,7 +121,7 @@ main(int argc, char *argv[])
 	uint8_t *rgba = XPKEntry_Decode(entry, &status);
 
 	if (status != LUNAPURPURA_OK) {
-		warnx("couldn't decode: %s", LPStatusString(status));
+		LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode: %s", LPStatusString(status));
 		goto fail;
 	}
 
@@ -140,7 +138,7 @@ main(int argc, char *argv[])
 #ifdef LUNAPURPURA_PNG_SUPPORT
 	if (out_path && want_png) {
 		if ((status = XPKDecoder_RGBAToPNG(rgba, entry, out_path)) != LUNAPURPURA_OK) {
-			warnx("couldn't write PNG!: %s", LPStatusString(status));
+			LPWarn(LP_SUBSYSTEM_XPK, "couldn't write PNG!: %s", LPStatusString(status));
 			goto fail;
 		}
 	}
