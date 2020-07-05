@@ -10,14 +10,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* for htons(3) et al */
 #ifdef LUNAPURPURA_TARGET_WINDOWS
-#include <WinSock2.h>
+#include "getopt.h" /* For getopt(3) */
+#include <WinSock2.h> /* For htons(3) et al */
 #else
-#include <arpa/inet.h>
+#include <unistd.h> /* For getopt(3) */
+#include <arpa/inet.h> /* For htons(3) et al */
 #endif
 
 #include "lputil.h"
+
+
+int
+LPGetopt(int nargc, char * const *nargv, const char *options)
+{
+	return getopt(nargc, nargv, options);
+}
+
 
 /*
  * Returns a string representation of the given LPStatus.

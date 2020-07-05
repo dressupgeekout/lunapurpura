@@ -5,7 +5,6 @@
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <lputil.h>
 
@@ -33,7 +32,7 @@ main(int argc, char *argv[])
 
 	int ch;
 
-	while ((ch = getopt(argc, argv, "h")) != -1) {
+	while ((ch = LPGetopt(argc, argv, "h")) != -1) {
 		switch (ch) {
 		case 'h':
 			usage();

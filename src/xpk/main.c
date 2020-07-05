@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <lputil.h>
 
@@ -56,7 +55,7 @@ main(int argc, char *argv[])
 	const char *opts =  "c:o:h";
 #endif
 
-	while ((ch = getopt(argc, argv, opts)) != -1) {
+	while ((ch = LPGetopt(argc, argv, opts)) != -1) {
 		switch (ch) {
 		case 'c':
 			clu_path = optarg;
