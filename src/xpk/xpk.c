@@ -149,7 +149,7 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 void
 XPK_Free(XPK *xpk)
 {
-	fclose(xpk->file);
+	if (xpk->file) fclose(xpk->file);
 	for (int i = 0; i < xpk->n_entries; i++) {
 		XPKEntry_Free(xpk->entries[i]);
 	}

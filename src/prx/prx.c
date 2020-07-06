@@ -146,7 +146,7 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 
 fail:
 		PRX_Free(prx);
-		fclose(fp);
+		if (fp) fclose(fp);
 		return NULL;
 }
 
