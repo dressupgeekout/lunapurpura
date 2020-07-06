@@ -8,6 +8,7 @@
 # This file is part of Luna Purpura.
 #
 
+require 'fileutils'
 require 'optparse'
 require 'pathname'
 require 'shellwords'
@@ -25,8 +26,8 @@ prxtool = "prx"
 
 parser = OptionParser.new do |opts|
   opts.banner = "usage: #{PROGNAME} [options ...] <RESOURCE-DIR>"
-  opts.on("-o", "--outdir PATH") { |path| out_dir = Pathname.new(path).expand_path }
-  opts.on("--prx PATH", "path to prx(1) tool") { |path| prxtool = Pathname.new(path).expand_path }
+  opts.on("-o", "--outdir PATH") { |path| out_dir = File.expand_path(path) }
+  opts.on("--prx PATH", "path to prx(1) tool") { |path| prxtool = File.expand_path(path) }
 end
 
 parser.parse!(ARGV)
@@ -39,15 +40,15 @@ if not resource_dir
   exit 1
 end
 
-resource_dir = Pathname.new(resource_dir)
+resource_dir = File.expand_path(resource_dir)
 
-if not resource_dir.directory?
+if not File.directory?(resource_dir)
   $stderr.puts "no such directory: #{resource_dir}"
   exit 1
 end
 
-Pathname.glob("#{resource_dir}/**/*.PRX").each do |prx|
-  new_dir = out_dir.join(prx.relative_path_from(resource_dir).sub(/\.PRX$/, ""))
-  new_dir.mkpath
-  cmd %Q(cd #{Shellwords.escape(new_dir)} && #{Shellwords.escape(prxtool)} -x -a #{Shellwords.escape(prx.realpath)})
+Dir.glob("#{resource_dir}/**/*.PRX").each do |prx|
+  new_dir = File.join(out_dir, Pathname.new(prx).relative_path_from(Pathname.new(resource_dir)).sub(/\.PRX$/, ""))
+  FileUtils.mkdir_p(new_dir)
+  cmd %Q(cd #{Shellwords.escape(new_dir)} && #{Shellwords.escape(prxtool)} -x -a #{Shellwords.escape(File.realpath(prx))})
 end
