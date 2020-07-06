@@ -88,7 +88,7 @@ main(int argc, char *argv[])
 				char total_filename[PRX_TOTAL_FILENAME_LEN];
 				snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
 
-				FILE *fp = fopen(total_filename, "w");
+				FILE *fp = fopen(total_filename, "wb");
 				if (!fp) {
 					LPWarn(LP_SUBSYSTEM_PRX, "unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
 					goto fail;

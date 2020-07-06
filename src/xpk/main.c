@@ -135,7 +135,7 @@ main(int argc, char *argv[])
 #else
 	if (out_path) {
 #endif
-		FILE *out_f = fopen(out_path, "w");
+		FILE *out_f = fopen(out_path, "wb");
 		fwrite(rgba, 4, entry->width*entry->height, out_f);
 		fclose(out_f);
 	}

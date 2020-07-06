@@ -61,7 +61,7 @@ XPKEntry_Decode(XPKEntry *entry, LPStatus *status)
 XPK *
 XPK_NewFromFile(const char *path, LPStatus *status)
 {
-	FILE *f = fopen(path, "r");
+	FILE *f = fopen(path, "rb");
 
 	if (!f) {
 		*status = LUNAPURPURA_CANTOPENFILE;
