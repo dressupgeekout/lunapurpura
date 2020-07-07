@@ -9,7 +9,7 @@ set(LUNAPURPURA_PNG_SUPPORT ON CACHE BOOL "Enable conversion to PNG")
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
   message(STATUS "Lua bindings enabled")
-  set(LUA_INCLUDEDIR "" CACHE PATH "Location of Lua 5.1/LuaJIT's header files")
+  set(LUA_INCLUDEDIR "${PROJECT_SOURCE_DIR}/lua/include" CACHE PATH "Location of Lua 5.1/LuaJIT's header files")
   set(LUA_LIBDIR "" CACHE PATH "Location of Lua 5.1/LuaJIT's library")
 endif()
 

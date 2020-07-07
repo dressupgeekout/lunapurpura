@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-project(lunapurpura)
 
 # User-settable options.
 set(LUNAPURPURA_XPK_HACK ON CACHE BOOL "Enable a silly XPK hack")

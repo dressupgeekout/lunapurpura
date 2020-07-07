@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-project(lunapurpura)
 
 add_subdirectory(clu)
 add_subdirectory(dib)

@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-project(lunapurpura)
 
 list(APPEND LPUTIL_SOURCES
   lputil.c
