@@ -184,7 +184,9 @@ size_t
 ReadUint16(FILE *file, size_t count, uint16_t *dest)
 {
 	size_t rv = fread(dest, sizeof(uint16_t), count, file);
+#ifndef LUNAPURPURA_BIG_ENDIAN
 	*dest = htons(*dest);
+#endif
 	return rv;
 }
 
@@ -197,7 +199,9 @@ size_t
 ReadUint16LE(FILE *file, size_t count, uint16_t *dest)
 {
 	size_t rv = fread(dest, sizeof(uint16_t), count, file);
-	/* XXX do something to guarantee it was little-endian */
+#ifdef LUNAPURPURA_BIG_ENDIAN
+	*dest = ntohs(*dest);
+#endif
 	return rv;
 }
 
@@ -210,7 +214,9 @@ size_t
 ReadUint32(FILE *file, size_t count, uint32_t *dest)
 {
 	size_t rv = fread(dest, sizeof(uint32_t), count, file);
+#ifndef LUNAPURPURA_BIG_ENDIAN
 	*dest = htonl(*dest);
+#endif
 	return rv;
 }
 
@@ -223,6 +229,8 @@ size_t
 ReadUint32LE(FILE *file, size_t count, uint32_t *dest)
 {
 	size_t rv = fread(dest, sizeof(uint32_t), count, file);
-	/* XXX do something to guarantee it was little-endian */
+#ifdef LUNAPURPURA_BIG_ENDIAN
+	*dest = ntohl(*dest);
+#endif
 	return rv;
 }
