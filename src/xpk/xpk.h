@@ -14,6 +14,8 @@
 
 #include <clu.h>
 
+#define LP_SUBSYSTEM_XPK "xpk"
+
 #define XPK_MAGIC_LEN 4
 
 extern uint8_t XPK_MAGIC[XPK_MAGIC_LEN];

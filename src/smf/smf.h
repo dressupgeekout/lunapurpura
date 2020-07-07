@@ -9,11 +9,14 @@
 
 #include <lputil.h>
 
+#define LP_SUBSYSTEM_SMF "smf"
+
 #define SMF_MAGIC_LEN 4
 
 extern uint8_t SMF_MAGIC[SMF_MAGIC_LEN];
 
 struct SMF {
+	void* ignore;
 };
 typedef struct SMF SMF;
 

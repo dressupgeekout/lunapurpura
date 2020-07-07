@@ -11,6 +11,8 @@
 
 #include <lputil.h>
 
+#define LP_SUBSYSTEM_CLU "clu"
+
 #define CLU_TYPE "CLU"
 #define CLU_NELEMENTS 256
 #define CLU_MAGIC_LEN 8

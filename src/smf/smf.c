@@ -20,7 +20,7 @@ uint8_t SMF_MAGIC[SMF_MAGIC_LEN] = {173, 126, 121, 0};
 SMF *
 SMF_NewFromFile(const char *path, LPStatus *status)
 {
-	FILE *f = fopen(path, "r");
+	FILE *f = fopen(path, "rb");
 
 	if (!f) {
 		*status = LUNAPURPURA_CANTOPENFILE;

@@ -2,9 +2,10 @@
  * prd/main.c
  */
 
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <lputil.h>
 
 #include "prd.h"
 
@@ -31,7 +32,7 @@ main(int argc, char *argv[])
 	PRD *prd = PRD_NewFromFile(path);
 
 	if (!prd) {
-		warn("Can't open PRD file %s", path);
+		LPWarn(LP_SUBSYSTEM_PRD, "Can't open PRD file %s", path);
 		return EXIT_FAILURE;
 	}
 
@@ -45,5 +46,5 @@ main(int argc, char *argv[])
 static void
 usage(void)
 {
-	warnx("usage: %s file", progname);
+	LPLog(LP_SUBSYSTEM_PRD, "usage: %s file", progname);
 }
