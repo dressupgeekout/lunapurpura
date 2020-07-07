@@ -18,7 +18,7 @@ uint8_t PRD_MAGIC[PRD_MAGIC_LEN] = {1, 0, 0, 0};
 PRD *
 PRD_NewFromFile(const char *path)
 {
-	FILE *f = fopen(path, "r");
+	FILE *f = fopen(path, "rb");
 
 	if (!f) {
 		return NULL;

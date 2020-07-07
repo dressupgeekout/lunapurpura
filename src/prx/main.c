@@ -4,16 +4,11 @@
  * This file is part of Luna Purpura.
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef __APPLE__
-#include <sys/errno.h>
-#else
-#include <errno.h>
-#endif
 
 #include <lputil.h>
 
@@ -70,6 +65,9 @@ main(int argc, char *argv[])
 
 	if (!prx) {
 		LPWarn(LP_SUBSYSTEM_PRX, "error: %s: %s", path, LPStatusString(status));
+		if (status == LUNAPURPURA_CANTOPENFILE) {
+			LPWarn(LP_SUBSYSTEM_PRX, "%s", strerror(errno));
+		}
 		goto fail;
 	}
 
@@ -90,7 +88,7 @@ main(int argc, char *argv[])
 				char total_filename[PRX_TOTAL_FILENAME_LEN];
 				snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
 
-				FILE *fp = fopen(total_filename, "w");
+				FILE *fp = fopen(total_filename, "wb");
 				if (!fp) {
 					LPWarn(LP_SUBSYSTEM_PRX, "unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
 					goto fail;

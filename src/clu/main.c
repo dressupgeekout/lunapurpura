@@ -4,6 +4,7 @@
  * This file is part of Luna Purpura.
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,6 +62,9 @@ main(int argc, char *argv[])
 	if (!clu) {
 		CLU_Free(clu);
 		LPWarn(LP_SUBSYSTEM_CLU, "%s: %s", clu_path, LPStatusString(status));
+		if (status == LUNAPURPURA_CANTOPENFILE) {
+			LPWarn(LP_SUBSYSTEM_CLU, "%s", strerror(errno));
+		}
 		return EXIT_FAILURE;
 	}
 

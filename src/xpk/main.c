@@ -2,9 +2,11 @@
  * xpk main
  */
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <lputil.h>
 
@@ -102,6 +104,9 @@ main(int argc, char *argv[])
 
 	if (!xpk) {
 		LPWarn(LP_SUBSYSTEM_XPK, "%s: %s", xpk_path, LPStatusString(status));
+		if (status == LUNAPURPURA_CANTOPENFILE) {
+			LPWarn(LP_SUBSYSTEM_XPK, "%s", strerror(errno));
+		}
 		return EXIT_FAILURE;
 	}
 
@@ -130,7 +135,7 @@ main(int argc, char *argv[])
 #else
 	if (out_path) {
 #endif
-		FILE *out_f = fopen(out_path, "w");
+		FILE *out_f = fopen(out_path, "wb");
 		fwrite(rgba, 4, entry->width*entry->height, out_f);
 		fclose(out_f);
 	}
