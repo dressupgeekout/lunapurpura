@@ -124,7 +124,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							ReadUint8(entry->xpk->file, 1 , &byte);
 							d->n_reps = byte;
 #ifdef LUNAPURPURA_XPK_TRACE
-							LPWarn(LP_SUBSYSTEM_XPK, "XPKINST_RLENEXT %d", byte);
+							LPWarn(LP_SUBSYSTEM_XPK, "RLENEXT %d", byte);
 #endif
 							break;
 						case XPKINST_REPEAT_END:
@@ -185,10 +185,20 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 #endif
 					break;
 				case XPKINST_DIRECT:
-					d->direct_counter = argument;
+					{
+						if (argument) {
+							d->direct_counter = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					LPWarn(LP_SUBSYSTEM_XPK, "DIRECT %d", argument);
+							LPWarn(LP_SUBSYSTEM_XPK, "DIRECT %d", argument);
 #endif
+						} else {
+							ReadUint16(entry->xpk->file, 1, &d->next_holder);
+							d->direct_counter = d->next_holder;
+#ifdef LUNAPURPURA_XPK_TRACE
+							LPWarn(LP_SUBSYSTEM_XPK, "DIRECT %d", d->next_holder);
+#endif
+						}
+					}
 					break;
 				case XPKINST_BIGDIRECT:
 					d->direct_counter = (16 + argument);
@@ -276,7 +286,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 #endif
 					break;
 				default:
-					LPWarn(LP_SUBSYSTEM_XPK, "?? unhandled XPK instruction: %X", byte);
+					LPWarn(LP_SUBSYSTEM_XPK, "?? unhandled XPK instruction: 0x%X, ftell=%ld", byte, ftell(entry->xpk->file));
 				}
 			}
 		}
