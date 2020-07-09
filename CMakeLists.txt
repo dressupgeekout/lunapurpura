@@ -33,7 +33,7 @@ endif()
 
 # Global build parameters.
 set(CMAKE_C_STANDARD 11)
-add_compile_options(-Wall -g)
+add_compile_options(-Wall)
 
 if(${LUNAPURPURA_DEBUG})
   message(STATUS "DEBUG macro enabled")
