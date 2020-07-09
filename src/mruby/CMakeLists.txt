@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.0)
-project(lunapurpura)
 
 find_library(LIBMRUBY NAMES mruby PATHS ${MRUBY_LIBDIR})
 
