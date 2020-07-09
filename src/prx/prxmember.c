@@ -50,9 +50,9 @@ PRXMember_SetFiletype(PRXMember *member, const char *filetype)
 
 
 void
-PRXMember_SetIdentifier(PRXMember *member, const uint32_t identifier)
+PRXMember_SetResourceId(PRXMember *member, const uint32_t rid)
 {
-	member->identifier = identifier;
+	member->rid = rid;
 }
 
 

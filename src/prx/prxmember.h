@@ -25,7 +25,7 @@ struct PRXMember {
 	char filetype[PRXMEMBER_FILETYPE_LEN];
 	uint16_t internal_id;
 	uint32_t offset;
-	uint32_t identifier;
+	uint32_t rid;
 	uint32_t size;
 	char name[PRXMEMBER_NAME_LEN];
 	void *data;
@@ -36,7 +36,7 @@ PRXMember *PRXMember_New(LPStatus *status);
 void PRXMember_SetInternalId(PRXMember *member, const uint16_t internal_id);
 void PRXMember_SetOffset(PRXMember *member, const uint32_t offset);
 void PRXMember_SetFiletype(PRXMember *member, const char filetype[PRXMEMBER_FILETYPE_LEN]);
-void PRXMember_SetIdentifier(PRXMember *member, const uint32_t identifier);
+void PRXMember_SetResourceId(PRXMember *member, const uint32_t rid);
 void PRXMember_SetSize(PRXMember *member, const uint32_t size);
 void PRXMember_SetName(PRXMember *member, const char *name);
 void PRXMember_SetData(PRXMember *member, void *data);
