@@ -75,30 +75,6 @@ CLU_Free(CLU *clu)
 }
 
 
-void
-CLU_Pretty(CLU *clu)
-{
-	uint8_t *cluptr = NULL;
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-	size_t rowlen = sqrt(CLU_NELEMENTS);
-
-	for (int i = 0; i < rowlen; i++) {
-		for (int j = 0; j < rowlen; j++) {
-			cluptr = clu->array[i*rowlen+j];
-			r = *cluptr;
-			cluptr++;
-			g = *cluptr;
-			cluptr++;
-			b = *cluptr;
-			fprintf(stderr, "(%d,%d,%d), ", r, g, b);
-		}
-		fprintf(stderr, "\n");
-	}
-}
-
-
 /*
  * The caller doesn't need to free the result, it's statically allocated.
  */
