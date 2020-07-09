@@ -26,7 +26,6 @@ typedef struct CLU CLU;
 
 CLU *CLU_NewFromFile(const char *path, LPStatus *status);
 void CLU_Free(CLU *clu);
-void CLU_Pretty(CLU *clu);
 const uint8_t *CLU_ColorAtIndex(const CLU *clu, const int index);
 
 #endif /* LUNAPURPURA_CLU_H */
