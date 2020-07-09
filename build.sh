@@ -17,6 +17,7 @@ mkdir -p ${love_dir}
 
 cd ${build_dir}
   cmake .. \
+    -DCMAKE_BUILD_TYPE=Debug \
     -DLUNAPURPURA_BUILD_LUA_BINDINGS=${lua_bindings} \
     -DLUNAPURPURA_BUILD_MRUBY_BINDINGS=OFF \
     -DLUNAPURPURA_PNG_SUPPORT=OFF
