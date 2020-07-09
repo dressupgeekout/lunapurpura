@@ -40,8 +40,17 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 	/* 128 + 10 - 1, I guess -- all zeroes */
 	fseek(fp, 137L, SEEK_CUR);
 
+	/*
+	 * This is the number of entries _including_ dummy ones, which may be
+	 * present at the start and/or end of the PRX's table of contents.
+	 */
+	uint16_t actual_n_entries;
+	ReadUint16LE(fp, 1, &actual_n_entries);
+
+	/* This is the real count of entries we ultimately care about. */
 	ReadUint16LE(fp, 1, &prx->n_entries);
-	fseek(fp, 4L, SEEK_CUR); /* Number of entries, again? */
+
+	fseek(fp, 2L, SEEK_CUR); /* Ignore */
 
 	prx->members = calloc(prx->n_entries, sizeof(PRXMember));
 
@@ -96,6 +105,12 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 
 		prx->members[i] = member;
 	}
+
+	/*
+	 * Account for the dummy entries at the end of the table of contents, if
+	 * necessary.
+	 */
+	fseek(fp, 24L*(actual_n_entries - prx->n_entries), SEEK_CUR);
 
 	/*
 	 * The "offset" field for each member does NOT indicate an absolute

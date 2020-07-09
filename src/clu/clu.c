@@ -36,7 +36,12 @@ CLU_NewFromFile(const char *path, LPStatus *status)
 		return NULL;
 	}
 
-	CLU *clu = malloc(sizeof(CLU)); /* XXX check for alloc error */
+	CLU *clu = malloc(sizeof(CLU));
+	if (!clu) {
+		*status = LUNAPURPURA_ERROR;
+		return NULL;
+	}
+
 	uint8_t *cluptr = NULL;
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
