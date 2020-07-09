@@ -68,10 +68,7 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	CLU_Pretty(clu);
-	printf("========================================\n");
-
-	for (int i = 0; i < 256; i++) {
+	for (int i = 0; i < CLU_NELEMENTS; i++) {
 		const uint8_t *color = CLU_ColorAtIndex(clu, i);
 		printf("<%d,%d,%d>\n", color[0], color[1], color[2]);
 	}
