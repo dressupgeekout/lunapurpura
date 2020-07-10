@@ -87,8 +87,8 @@ luaprx_MemberAtIndex(lua_State *L)
 	lua_setfield(L, -2, "filetype");
 	lua_pushinteger(L, member->internal_id);
 	lua_setfield(L, -2, "internal_id");
-	lua_pushinteger(L, member->identifier);
-	lua_setfield(L, -2, "identifier");
+	lua_pushinteger(L, member->rid);
+	lua_setfield(L, -2, "resource_id");
 	lua_pushinteger(L, member->size);
 	lua_setfield(L, -2, "size");
 	lua_pushstring(L, member->name);
