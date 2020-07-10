@@ -109,7 +109,7 @@ main(int argc, char *argv[])
 			for (int i = 0; i < prx->n_entries; i++) {
 				PRXMember *member = prx->members[i];
 				printf("%-6d%-18s%-6s%-8d%-8d\n",
-					member->internal_id-1, member->name, member->filetype, member->identifier,
+					member->internal_id-1, member->name, member->filetype, member->rid,
 					member->size);
 			}
 		}

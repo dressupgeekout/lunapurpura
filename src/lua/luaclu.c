@@ -34,7 +34,10 @@ luaclu_NewFromFile(lua_State *L)
 	luaL_getmetatable(L, CLU_TYPE_NAME);
 	lua_setmetatable(L, -2);
 	LPStatus status;
-	*clu = CLU_NewFromFile(path, &status); /* XXX check status */
+	*clu = CLU_NewFromFile(path, &status);
+	if (status != LUNAPURPURA_OK) {
+		return luaL_error(L, "%s", LPStatusString(status));
+	}
 	return 1;
 }
 

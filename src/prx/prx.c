@@ -95,9 +95,9 @@ PRX_NewFromFile(const char *path, bool want_data, LPStatus *status)
 		ReadChar(fp, PRXMEMBER_FILETYPE_LEN, filetype);
 		PRXMember_SetFiletype(member, filetype);
 
-		uint32_t id;
-		ReadUint32LE(fp, 1, &id);
-		PRXMember_SetIdentifier(member, id);
+		uint32_t rid;
+		ReadUint32LE(fp, 1, &rid);
+		PRXMember_SetResourceId(member, rid);
 
 		uint32_t size;
 		ReadUint32LE(fp, 1, &size);
