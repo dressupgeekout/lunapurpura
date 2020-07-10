@@ -5,6 +5,7 @@ add_subdirectory(dib)
 add_subdirectory(lputil)
 add_subdirectory(prd)
 add_subdirectory(prx)
+add_subdirectory(riff)
 add_subdirectory(smf)
 add_subdirectory(xpk)
 
