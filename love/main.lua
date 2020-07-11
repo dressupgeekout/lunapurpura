@@ -7,7 +7,7 @@ local PRD = require("luaprd")
 local PRX = require("luaprx")
 local XPK = require("luaxpk")
 
-require("games_list")
+require("games")
 
 --------- --------- ---------
 
@@ -46,7 +46,7 @@ end
 --[[XXX In reality we'd refer to it by its number, or something along those
 lines.]]
 local function LoadCLU(path)
-	return CLU.NewFromFile("RESOURCE/"..path)
+	return CLU.NewFromFile(CurrentGame.."/RESOURCE/"..path)
 end
 
 --[[Returns a table which contains information you need in order to
@@ -65,14 +65,14 @@ end
 --[[Reads an XPK from disk and also decodes it.]]
 local function LoadXPK(path, clu)
 	print(string.format("** LOAD XPK %q", path))
-	local xpk = XPK.NewFromFile("RESOURCE/"..path, clu)
+	local xpk = XPK.NewFromFile(CurrentGame.."/RESOURCE/"..path, clu)
 	return DecodeXPK(xpk)
 end
 
 function LoadSound(path)
 	print(string.format("** LOAD AIF %q", path))
 	--[[XXX XXX XXX HACK: add ".wav" at the end for now]]
-	local source = love.audio.newSource("RESOURCE/"..path..".wav", "static")
+	local source = love.audio.newSource(CurrentGame.."/RESOURCE/"..path..".wav", "static")
 	source:setLooping(false)
 	return source
 end
@@ -169,7 +169,7 @@ end
 the original?]]
 function LoadScene(name)
 	print(string.format("** Loading scene %q", name))
-	local this = require("scene_"..name)
+	local this = require(CurrentGame.."/scene_"..name)
 
 	CURRENT_SCENE = {}
 	CURRENT_SCENE.Name = name
@@ -209,15 +209,15 @@ function love.load(argv, unfiltered_argv)
 
 	love.graphics.setBackgroundColor(127/255, 23/255, 151/255) -- "certain purple"
 
-	local game = table.remove(argv, 1) or ""
+	CurrentGame = table.remove(argv, 1) or ""
 
-	if not Games[game] then
-		local msg = string.format("No such game %q.\n\nValid games: %s", game, table.concat(ValidGameNames, ", "))
+	if not Games[CurrentGame] then
+		local msg = string.format("No such game %q.\n\nValid games: %s", CurrentGame, table.concat(ValidGameNames, ", "))
 		error(msg)
 	end
 
-	print(string.format("LOADING GAME: %s", Games[game]))
-	love.window.setTitle(string.format("Luna Purpura: %s", Games[game]))
+	print(string.format("LOADING GAME: %s", Games[CurrentGame]))
+	love.window.setTitle(string.format("Luna Purpura: %s", Games[CurrentGame]))
 
 	CURRENT_SCENE = nil
 
