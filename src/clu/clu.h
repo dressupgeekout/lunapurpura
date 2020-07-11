@@ -24,6 +24,7 @@ struct CLU {
 };
 typedef struct CLU CLU;
 
+CLU *CLU_NewFromData(uint8_t *region, LPStatus *status);
 CLU *CLU_NewFromFile(const char *path, LPStatus *status);
 void CLU_Free(CLU *clu);
 const uint8_t *CLU_ColorAtIndex(const CLU *clu, const int index);

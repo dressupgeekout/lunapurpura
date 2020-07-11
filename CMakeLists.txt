@@ -5,6 +5,7 @@ project(lunapurpura)
 set(LUNAPURPURA_DEBUG ON CACHE BOOL "Enable debug output")
 set(LUNAPURPURA_BUILD_LUA_BINDINGS OFF CACHE BOOL "Build the Lua/LuaJIT bindings")
 set(LUNAPURPURA_BUILD_MRUBY_BINDINGS OFF CACHE BOOL "Build the mruby bindings")
+set(LUNAPURPURA_BUILD_TESTS ON CACHE BOOL "Build the test applications")
 set(LUNAPURPURA_PNG_SUPPORT ON CACHE BOOL "Enable conversion to PNG")
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
@@ -17,6 +18,10 @@ if(${LUNAPURPURA_BUILD_MRUBY_BINDINGS})
   message(STATUS "mruby bindings enabled")
   set(MRUBY_INCLUDEDIR "" CACHE PATH "Location of mruby's header files")
   set(MRUBY_LIBDIR "" CACHE PATH "Location of mruby's library")
+endif()
+
+if(${LUNAPURPURA_BUILD_TESTS})
+  message(STATUS "Test programs enabled")
 endif()
 
 if(${LUNAPURPURA_PNG_SUPPORT})

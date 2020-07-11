@@ -38,6 +38,7 @@ The following CMake configuration options are supported:
 - BOOL `LUNAPURPURA_DEBUG` -- Enable debug output
 - BOOL `LUNAPURPURA_BUILD_LUA_BINDINGS` -- Build the Lua 5.1 (or LuaJIT) bindings
 - BOOL `LUNAPURPURA_BUILD_MRUBY_BINDINGS` -- Build the mruby bindings
+- BOOL `LUNAPURPURA_BUILD_TESTS` -- Build the test applications
 - BOOL `LUNAPURPURA_PNG_SUPPORT` -- Enable conversion to PNG
 
 So, for example:
