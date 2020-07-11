@@ -7,6 +7,8 @@ local PRD = require("luaprd")
 local PRX = require("luaprx")
 local XPK = require("luaxpk")
 
+require("games_list")
+
 --------- --------- ---------
 
 local function dump_clu(clu)
@@ -196,9 +198,8 @@ end
 
 --------- --------- ---------
 
-function love.load()
+function love.load(argv, unfiltered_argv)
 	love.window.setMode(640, 480)
-	love.window.setTitle("Luna Purpura")
 	print(string.format("*** Luna Purpura % s***", VERSION))
 
 	print(string.format("CLU -> %s", serpent.line(CLU)))
@@ -208,14 +209,15 @@ function love.load()
 
 	love.graphics.setBackgroundColor(127/255, 23/255, 151/255) -- "certain purple"
 
-	--[[Testing PRX functionality]]
-	local prx = PRX.NewFromFile("__RESOURCE/Global.PRX")
-	print(string.format("%s", serpent.line(prx)))
-	for i = 1, PRX.NEntries(prx), 1 do
-		local member = PRX.MemberAtIndex(prx, i)
-		 print(string.format("-> MEMBER internal_id=%d format=%s name=%s",
-			member.internal_id, member.filetype, member.name))
+	local game = table.remove(argv, 1) or ""
+
+	if not Games[game] then
+		local msg = string.format("No such game %q.\n\nValid games: %s", game, table.concat(ValidGameNames, ", "))
+		error(msg)
 	end
+
+	print(string.format("LOADING GAME: %s", Games[game]))
+	love.window.setTitle(string.format("Luna Purpura: %s", Games[game]))
 
 	CURRENT_SCENE = nil
 
