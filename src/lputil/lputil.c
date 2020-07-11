@@ -30,7 +30,7 @@ static void lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, v
 static void
 lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, va_list ap)
 {
-	static char real_fmt[256];
+	static char real_fmt[512];
 	snprintf(real_fmt, sizeof(real_fmt), "%s: %s\n", subsystem, fmt);
 	vfprintf(stream, real_fmt, ap);
 	va_end(ap);
