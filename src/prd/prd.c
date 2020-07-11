@@ -25,7 +25,7 @@ PRD_NewFromFile(const char *path)
 	}
 
 	/* XXX should somehow warn about bad magic */
-	if (!ValidateMagic(f, PRD_MAGIC, PRD_MAGIC_LEN)) {
+	if (!ValidateMagicF(f, PRD_MAGIC, PRD_MAGIC_LEN)) {
 		return NULL;
 	}
 
