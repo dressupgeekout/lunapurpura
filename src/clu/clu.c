@@ -41,27 +41,30 @@ CLU_NewFromData(uint8_t *region, LPStatus *status)
 	uint8_t *cluptr = NULL;
 	uint8_t *regionptr = region;
 
-	if (!ValidateMagic(regionptr, CLU_MAGIC, CLU_MAGIC_LEN)) {
+	if (!ValidateMagic(region, CLU_MAGIC, CLU_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
 	}
+
+	regionptr += CLU_MAGIC_LEN;
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
 		memset(clu->array[i], 0, sizeof(clu->array[i]));
 		cluptr = clu->array[i];
 
-		regionptr += 2; /* marker */
+		regionptr += 2; /* skip marker */
 
 		*cluptr = *regionptr; /* red */
-		regionptr++;
-
 		cluptr++;
+
+		regionptr += 2;
 		*cluptr = *regionptr; /* green */
-		regionptr++;
-
 		cluptr++;
+
+		regionptr += 2;
 		*cluptr = *regionptr; /* blue */
-		regionptr++;
+
+		regionptr += 2; /* go to next marker */
 	}
 
 	*status = LUNAPURPURA_OK;

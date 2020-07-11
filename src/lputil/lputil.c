@@ -100,10 +100,6 @@ LPStatusString(const LPStatus status)
 }
 
 
-/*
- * If the magic is good, The region pointer is incremented to the end of the
- * magic.
- */
 bool
 ValidateMagic(uint8_t *region, const uint8_t *expected_magic, const size_t magic_len)
 {
@@ -114,12 +110,10 @@ ValidateMagic(uint8_t *region, const uint8_t *expected_magic, const size_t magic
 			regionptr++;
 		} else {
 			LPDebug("", "(%s) %d != %d", __func__, *regionptr, expected_magic[i]);
-			regionptr = region;
 			return false;
 		}
 	}
 
-	region += magic_len;
 	return true;
 }
 
