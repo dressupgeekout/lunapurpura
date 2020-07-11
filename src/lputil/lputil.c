@@ -127,8 +127,6 @@ ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len)
 			fclose(file);
 			rv = false;
 			goto done;
-		} else {
-			LPDebug("", "(%s) %d == %d", __func__, our_magic[i], expected_magic[i]);
 		}
 	}
 
