@@ -221,7 +221,10 @@ function love.load(argv, unfiltered_argv)
 
 	CURRENT_SCENE = nil
 
-	LoadScene("housekeeping1")
+	if
+		CurrentGame == "newschool" then LoadScene("housekeeping1")
+		elseif CurrentGame == "tricky" then LoadScene("housekeeping")
+	end
 end
 
 function love.keypressed(key, scancode)
