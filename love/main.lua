@@ -196,6 +196,37 @@ function LoadScene(name)
 	CURRENT_SCENE.FUNCS.OnLoad()
 end
 
+function LoadScene2(name)
+	print(string.format("** Loading scene %q", name))
+	local this = require(CurrentGame.."/scene_"..name)
+
+	local archive = PRX.NewFromFile(ResourceDir.."/"..this.Archive..".PRX")
+
+	CURRENT_SCENE = {}
+	CURRENT_SCENE.Name = name
+	CURRENT_SCENE.CLU = CLU.NewFromData(PRX.MemberWithResourceId(archive, "CLU", this.CLU).data)
+	CURRENT_SCENE.XPKS = {}
+	CURRENT_SCENE.SOUNDS = {}
+	CURRENT_SCENE.FUNCS = {
+		OnLoad = this.OnLoad or function() end,
+		MouseMoved = this.MouseMoved or function() end,
+		MousePressed = this.MousePressed or function() end,
+		KeyPressed = this.KeyPressed or function() end,
+	}
+
+	--for _, rid in ipairs(this.Template.XPKS) do
+	--	CURRENT_SCENE.XPKS[rid] = XPK.NewFromData(PRX.MemberWithResourceId(archive, "XPK", rid).data)
+	--end
+
+	--if this.Template.SOUNDS then
+	--	for _, rid in ipairs(this.Template.SOUNDS) do
+	--		CURRENT_SCENE.SOUNDS[rid] = LoadSound(PRX.MemberWithResourceId(archive, "Aif", rid).data)
+	--	end
+	--end
+
+	CURRENT_SCENE.FUNCS.OnLoad()
+end
+
 --------- --------- ---------
 
 function love.load(argv, unfiltered_argv)
@@ -242,6 +273,7 @@ function love.load(argv, unfiltered_argv)
 	if
 		CurrentGame == "newschool" then LoadScene("housekeeping1")
 		elseif CurrentGame == "tricky" then LoadScene("housekeeping")
+		elseif CurrentGame == "secret" then LoadScene2("housekeeping")
 	end
 end
 
