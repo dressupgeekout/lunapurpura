@@ -16,3 +16,7 @@ endif()
 if(${LUNAPURPURA_BUILD_MRUBY_BINDINGS})
   add_subdirectory(mruby)
 endif()
+
+if(${LUNAPURPURA_BUILD_TESTS})
+  add_subdirectory(tests)
+endif()
