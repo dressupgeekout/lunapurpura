@@ -29,5 +29,6 @@ typedef struct PRX PRX;
 PRX *PRX_NewFromFile(const char *path, bool want_data, LPStatus *status);
 void PRX_Free(PRX *prx);
 uint32_t PRX_AbsoluteOffsetForMember(const PRX *prx, const int index);
+PRXMember *PRX_MemberWithResourceId(const PRX *prx,  char *filetype, uint32_t rid);
 
 #endif /* LUNAPURPURA_PRX_H */

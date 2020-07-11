@@ -35,7 +35,8 @@ void LPDebug(const char *subsystem, const char *fmt, ...);
 
 int LPGetopt(int nargc, char * const *nargv, const char *options);
 const char *LPStatusString(const LPStatus status);
-bool ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len);
+bool ValidateMagic(uint8_t *region, const uint8_t *expected_magic, const size_t magic_len);
+bool ValidateMagicF(FILE *file, const uint8_t *expected_magic, const size_t magic_len);
 
 size_t ReadChar(FILE *file, size_t count, char *dest);
 size_t ReadUint8(FILE *file, size_t count, uint8_t *dest);

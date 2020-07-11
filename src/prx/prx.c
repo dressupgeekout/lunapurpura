@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <lputil.h>
 
@@ -184,4 +185,27 @@ uint32_t
 PRX_AbsoluteOffsetForMember(const PRX *prx, const int index)
 {
 	return prx->data_offset_start + prx->members[index]->offset;
+}
+
+
+/*
+ * XXX This traversal could be pretty slow
+ *
+ * May return NULL.
+ */
+PRXMember *
+PRX_MemberWithResourceId(const PRX *prx,  char *filetype, uint32_t rid)
+{
+	PRXMember *member = NULL;
+
+	for (int i = 0; i < prx->n_entries; i++) {
+		member = prx->members[i];
+		if (!strncmp(member->filetype, filetype, PRXMEMBER_FILETYPE_LEN)) {
+			if (member->rid == rid) {
+				return member;
+			}
+		}
+	}
+
+	return NULL;
 }

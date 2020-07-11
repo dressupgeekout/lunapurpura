@@ -68,7 +68,7 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 		return NULL;
 	}
 
-	if (!ValidateMagic(f, XPK_MAGIC, XPK_MAGIC_LEN)) {
+	if (!ValidateMagicF(f, XPK_MAGIC, XPK_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
 	}
