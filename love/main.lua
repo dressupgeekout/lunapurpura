@@ -46,7 +46,7 @@ end
 --[[XXX In reality we'd refer to it by its number, or something along those
 lines.]]
 local function LoadCLU(path)
-	return CLU.NewFromFile(CurrentGame.."/RESOURCE/"..path)
+	return CLU.NewFromFile(ResourceDir.."/"..path)
 end
 
 --[[Returns a table which contains information you need in order to
@@ -65,14 +65,14 @@ end
 --[[Reads an XPK from disk and also decodes it.]]
 local function LoadXPK(path, clu)
 	print(string.format("** LOAD XPK %q", path))
-	local xpk = XPK.NewFromFile(CurrentGame.."/RESOURCE/"..path, clu)
+	local xpk = XPK.NewFromFile(ResourceDir.."/"..path, clu)
 	return DecodeXPK(xpk)
 end
 
 function LoadSound(path)
 	print(string.format("** LOAD AIF %q", path))
 	--[[XXX XXX XXX HACK: add ".wav" at the end for now]]
-	local source = love.audio.newSource(CurrentGame.."/RESOURCE/"..path..".wav", "static")
+	local source = love.audio.newSource(ResourceDir.."/"..path..".wav", "static")
 	source:setLooping(false)
 	return source
 end
@@ -209,14 +209,32 @@ function love.load(argv, unfiltered_argv)
 
 	love.graphics.setBackgroundColor(127/255, 23/255, 151/255) -- "certain purple"
 
-	CurrentGame = table.remove(argv, 1) or ""
+	CurrentGame = nil
+	ResourceDir = nil
+
+	while #argv > 0 do
+		local arg = table.remove(argv, 1)
+
+		if arg == "--game" then
+			CurrentGame = table.remove(argv, 1)
+		elseif arg == "--resource-dir" then
+			ResourceDir = table.remove(argv, 1)
+		else
+			error(string.format("unknown option: %q", arg))
+		end
+	end
 
 	if not Games[CurrentGame] then
-		local msg = string.format("No such game %q.\n\nValid games: %s", CurrentGame, table.concat(ValidGameNames, ", "))
+		local msg = string.format("No such game %q.\n\nValid games: %s", CurrentGame or "(nil)", table.concat(ValidGameNames, ", "))
 		error(msg)
 	end
 
+	if not ResourceDir then
+		ResourceDir = CurrentGame.."/RESOURCE"
+	end
+
 	print(string.format("LOADING GAME: %s", Games[CurrentGame]))
+	print(string.format("USING RESOURCE DIR: %s", ResourceDir))
 	love.window.setTitle(string.format("Luna Purpura: %s", Games[CurrentGame]))
 
 	CURRENT_SCENE = nil

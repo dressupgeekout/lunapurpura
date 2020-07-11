@@ -30,7 +30,7 @@ static void lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, v
 static void
 lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, va_list ap)
 {
-	static char real_fmt[256];
+	static char real_fmt[512];
 	snprintf(real_fmt, sizeof(real_fmt), "%s: %s\n", subsystem, fmt);
 	vfprintf(stream, real_fmt, ap);
 	va_end(ap);
@@ -101,13 +101,37 @@ LPStatusString(const LPStatus status)
 
 
 /*
+ * If the magic is good, The region pointer is incremented to the end of the
+ * magic.
+ */
+bool
+ValidateMagic(uint8_t *region, const uint8_t *expected_magic, const size_t magic_len)
+{
+	uint8_t *regionptr = region;
+
+	for (int i = 0; i < magic_len; i++) {
+		if (*regionptr == expected_magic[i]) {
+			regionptr++;
+		} else {
+			LPDebug("", "(%s) %d != %d", __func__, *regionptr, expected_magic[i]);
+			regionptr = region;
+			return false;
+		}
+	}
+
+	region += magic_len;
+	return true;
+}
+
+
+/*
  * The FILE pointer is expected to have already been rewinded to the
  * beginning of the file. If the magic is good, then we return true and
  * leave the file seeked to the end of the magic. Otherwise, the magic is
  * bad and we return false and close the file.
  */
 bool
-ValidateMagic(FILE *file, const uint8_t *expected_magic, const size_t magic_len)
+ValidateMagicF(FILE *file, const uint8_t *expected_magic, const size_t magic_len)
 {
 	bool rv = true;
 

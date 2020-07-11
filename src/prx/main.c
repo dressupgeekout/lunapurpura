@@ -34,7 +34,9 @@ static char *progname = NULL;
 static char *path = NULL;
 static bool verbose = false;
 static enum PRXToolAction action = PRX_TOOL_ACTION_NONE;
-static int which_asset = -1;
+static uint32_t which_asset = 0;
+static char *which_filetype = NULL;
+static bool want_asset_by_rid = false;
 static bool want_all_assets = false;
 
 /* ********** */
@@ -84,7 +86,23 @@ main(int argc, char *argv[])
 			max_i = want_all_assets ? prx->n_entries-1 : which_asset;
 
 			for (int i = min_i; i <= max_i; i++) {
-				PRXMember *member = prx->members[i-1];
+				PRXMember *member = NULL;
+
+				if (want_asset_by_rid) {
+					member = PRX_MemberWithResourceId(prx, which_filetype, which_asset);
+				} else {
+					member = prx->members[i-1];
+				}
+
+				if (!member) {
+					if (want_asset_by_rid) {
+						LPWarn(LP_SUBSYSTEM_PRX, "%s: no such %s member with RID %ld", path, which_filetype, which_asset);
+					} else {
+						LPWarn(LP_SUBSYSTEM_PRX, "%s: no such member with ID %ld", path, which_asset);
+					}
+					continue;
+				}
+
 				char total_filename[PRX_TOTAL_FILENAME_LEN];
 				snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
 
@@ -133,17 +151,24 @@ parse_options(int *argc, char **argv[])
 {
 	int ch;
 
-	while ((ch = LPGetopt(*argc, *argv, "ahn:tvx")) != -1) {
+	while ((ch = LPGetopt(*argc, *argv, "af:hn:r:tvx")) != -1) {
 		switch (ch) {
 		case 'a':
 			want_all_assets = true;
+			break;
+		case 'f':
+			which_filetype = optarg;
 			break;
 		case 'h':
 			usage();
 			return EXIT_SUCCESS;
 			break;
 		case 'n':
-			which_asset = atoi(optarg);
+			which_asset = (uint32_t)atoi(optarg);
+			break;
+		case 'r':
+			which_asset = (uint32_t)atoi(optarg);
+			want_asset_by_rid = true;
 			break;
 		case 't':
 			action = PRX_TOOL_ACTION_LIST;
@@ -174,14 +199,21 @@ parse_options(int *argc, char **argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (action == PRX_TOOL_ACTION_EXTRACT && !want_all_assets && which_asset < 0) {
-		usage();
-		return EXIT_FAILURE;
-	}
+	if (action == PRX_TOOL_ACTION_EXTRACT) {
+		if (!want_all_assets && !which_asset) {
+			usage();
+			return EXIT_FAILURE;
+		}
 
-	if (action == PRX_TOOL_ACTION_EXTRACT && want_all_assets && which_asset >= 0) {
-		usage();
-		return EXIT_FAILURE;
+		if (want_all_assets && which_asset) {
+			usage();
+			return EXIT_FAILURE;
+		}
+
+		if (want_asset_by_rid && (!which_filetype || !which_asset)) {
+			usage();
+			return EXIT_FAILURE;
+		}
 	}
 
 	path = *argv[0];
@@ -196,10 +228,11 @@ usage(void)
 	LPWarn(
 		LP_SUBSYSTEM_PRX,
 		"usage: %s [options ...] [file]\n"
-			"\t%s -t <file>               List members\n"
-			"\t%s -x [-v] -n <ID> <file>  Extract a single member\n"
-			"\t%s -x [-v] -a <file>       Extract all members\n"
-			"\t%s -h                      Show this help message",
-		progname, progname, progname, progname, progname
+			"\t%s -t <file>                          List members\n"
+			"\t%s -x [-v] -n <ID> <file>             Extract a single member\n"
+			"\t%s -x [-v] -f <TYPE> -r <RID> <file>  Extract a single member by RID\n"
+			"\t%s -x [-v] -a <file>                  Extract all members\n"
+			"\t%s -h                                 Show this help message",
+		progname, progname, progname, progname, progname, progname
 	);
 }

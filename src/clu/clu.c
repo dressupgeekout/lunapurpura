@@ -31,7 +31,7 @@ CLU_NewFromFile(const char *path, LPStatus *status)
 		return NULL;
 	}
 
-	if (!ValidateMagic(f, CLU_MAGIC, CLU_MAGIC_LEN)) {
+	if (!ValidateMagicF(f, CLU_MAGIC, CLU_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
 	}

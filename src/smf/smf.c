@@ -27,7 +27,7 @@ SMF_NewFromFile(const char *path, LPStatus *status)
 		return NULL;
 	}
 
-	if (!ValidateMagic(f, SMF_MAGIC, SMF_MAGIC_LEN)) {
+	if (!ValidateMagicF(f, SMF_MAGIC, SMF_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
 	}
