@@ -14,16 +14,44 @@
 
 #define PRX_TYPE_NAME "T_PRX"
 
+static void prx_member_to_table(lua_State *L, PRXMember *member);
+
 static int luaprx_NewFromFile(lua_State *L);
 static int luaprx_NEntries(lua_State *L);
 static int luaprx_MemberAtIndex(lua_State *L);
+static int luaprx_MemberWithResourceId(lua_State *L);
 
 static const luaL_Reg functions[] = {
 	{"NewFromFile", luaprx_NewFromFile},
 	{"NEntries", luaprx_NEntries},
 	{"MemberAtIndex", luaprx_MemberAtIndex},
+	{"MemberWithResourceId", luaprx_MemberWithResourceId},
 	{NULL, NULL}
 };
+
+/* ********** */
+
+/*
+ * INTERNAL. Creates a plain Lua table which represents the provided
+ * PRXMember. Leaves the table on the top of the stack.
+ */
+static void
+prx_member_to_table(lua_State *L, PRXMember *member)
+{
+	lua_newtable(L);
+	lua_pushstring(L, member->filetype);
+	lua_setfield(L, -2, "filetype");
+	lua_pushinteger(L, member->internal_id);
+	lua_setfield(L, -2, "internal_id");
+	lua_pushinteger(L, member->rid);
+	lua_setfield(L, -2, "resource_id");
+	lua_pushinteger(L, member->size);
+	lua_setfield(L, -2, "size");
+	lua_pushstring(L, member->name);
+	lua_setfield(L, -2, "name");
+	lua_pushlstring(L, member->data, member->size);
+	lua_setfield(L, -2, "data");
+}
 
 /* ********** */
 
@@ -81,23 +109,27 @@ luaprx_MemberAtIndex(lua_State *L)
 	lua_pop(L, 2);
 
 	PRXMember *member = (*prx)->members[index];
-
-	lua_newtable(L);
-	lua_pushstring(L, member->filetype);
-	lua_setfield(L, -2, "filetype");
-	lua_pushinteger(L, member->internal_id);
-	lua_setfield(L, -2, "internal_id");
-	lua_pushinteger(L, member->rid);
-	lua_setfield(L, -2, "resource_id");
-	lua_pushinteger(L, member->size);
-	lua_setfield(L, -2, "size");
-	lua_pushstring(L, member->name);
-	lua_setfield(L, -2, "name");
-	lua_pushlstring(L, member->data, member->size);
-	lua_setfield(L, -2, "data");
-
+	prx_member_to_table(L, member);
 	return 1;
 }
+
+
+/*
+ * prxmember (table) = PRX.MemberWithResourceId(prx, filetype, rid)
+ */
+static int
+luaprx_MemberWithResourceId(lua_State *L)
+{
+	PRX **prx = luaL_checkudata(L, 1, PRX_TYPE_NAME);
+	const char *filetype = luaL_checkstring(L, 2);
+	uint32_t rid = (uint32_t)luaL_checkint(L, 3);
+	lua_pop(L, 3);
+
+	PRXMember *member = PRX_MemberWithResourceId(*prx, (char *)filetype, rid);
+	prx_member_to_table(L, member);
+	return 1;
+}
+
 
 /* ********** */
 
