@@ -59,5 +59,6 @@ XPK *XPK_NewFromFile(const char *path, LPStatus *status);
 void XPK_Free(XPK *xpk);
 XPKEntry *XPK_EntryAtIndex(const XPK *xpk, const int index);
 void XPK_AttachCLU(XPK *xpk, CLU *clu);
+uint8_t *XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status);
 
 #endif /* LUNAPURPURA_XPK_H */

@@ -83,7 +83,7 @@ main(int argc, char *argv[])
 			int min_i;
 			int max_i;
 			min_i = want_all_assets ? 1 : which_asset;
-			max_i = want_all_assets ? prx->n_entries-1 : which_asset;
+			max_i = want_all_assets ? prx->n_entries : which_asset;
 
 			for (int i = min_i; i <= max_i; i++) {
 				PRXMember *member = NULL;

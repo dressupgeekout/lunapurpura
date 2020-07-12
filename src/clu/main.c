@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
 		const uint8_t *color = CLU_ColorAtIndex(clu, i);
-		printf("%d\t %d,%d,%d\n", i, color[0], color[1], color[2]);
+		printf("%d\t%d,%d,%d\n", i, color[0], color[1], color[2]);
 	}
 
 	CLU_Free(clu);
