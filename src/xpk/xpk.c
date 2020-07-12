@@ -130,15 +130,13 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 
 	/* XXX check for malloc error */
 	xpk->offsets = calloc(xpk->n_entries, sizeof(uint32_t));
-	uint32_t **p = &xpk->offsets;
 
 	for (int i = 0; i < xpk->n_entries; i++) {
 		uint32_t offset;
 		ReadUint32(f, 1, &offset);
 		uint32_t absolute_offset = offsets_start_pos + offset;
-		**p = absolute_offset;
+		xpk->offsets[i] = absolute_offset;
 		xpk->entries[i]->offset = absolute_offset;
-		p++;
 	}
 
 	*status = LUNAPURPURA_OK;
