@@ -62,11 +62,27 @@ local function DecodeXPK(xpk, ...)
 	}
 end
 
+--[[Tiled-mode XPKs are always drawn full screen, with the top-left corner at
+(0, 0).]]
+local function DecodeXPKTiledMode(xpk)
+	local data = XPK.DecodeTiledMode(xpk)
+	return {
+		Image = love.graphics.newImage(love.image.newImageData(640, 480, "rgba8", data)),
+		Visible = false,
+	}
+end
+
 --[[Reads an XPK from disk and also decodes it.]]
 local function LoadXPK(path, clu)
 	print(string.format("** LOAD XPK %q", path))
 	local xpk = XPK.NewFromFile(ResourceDir.."/"..path, clu)
 	return DecodeXPK(xpk)
+end
+
+local function LoadBackgroundXPK(path, clu)
+	print(string.format("** LOAD BACKGROUND XPK %q", path))
+	local xpk = XPK.NewFromFile(ResourceDir.."/"..path, clu)
+	return DecodeXPKTiledMode(xpk)
 end
 
 function LoadSound(path)
@@ -127,6 +143,10 @@ function GetImage(name)
 	return CURRENT_SCENE.XPKS[name..".XPK"]
 end
 
+function GetBackgroundImage(name)
+	return CURRENT_SCENE.BACKGROUNDS[name..".XPK"]
+end
+
 function GetSound(name)
 	return CURRENT_SCENE.SOUNDS[name..".AIF"]
 end
@@ -137,6 +157,14 @@ end
 
 function HideImage(name)
 	GetImage(name).Visible = false
+end
+
+function ShowBackgroundImage(name)
+	GetBackgroundImage(name).Visible = true
+end
+
+function HideBackgroundImage(name)
+	GetBackgroundImage(name).Visible = false
 end
 
 --[[Creates MouseIn and MouseOut event handlers which will show the picture
@@ -174,6 +202,7 @@ function LoadScene(name)
 	CURRENT_SCENE = {}
 	CURRENT_SCENE.Name = name
 	CURRENT_SCENE.CLU = LoadCLU(this.Template.CLU)
+	CURRENT_SCENE.BACKGROUNDS = {}
 	CURRENT_SCENE.XPKS = {}
 	CURRENT_SCENE.SOUNDS = {}
 	CURRENT_SCENE.FUNCS = {
@@ -182,6 +211,10 @@ function LoadScene(name)
 		MousePressed = this.MousePressed or function() end,
 		KeyPressed = this.KeyPressed or function() end,
 	}
+
+	for _, path in ipairs(this.Template.Backgrounds) do
+		CURRENT_SCENE.BACKGROUNDS[path] = LoadBackgroundXPK(path, CURRENT_SCENE.CLU)
+	end
 
 	for _, path in ipairs(this.Template.XPKS) do
 		CURRENT_SCENE.XPKS[path] = LoadXPK(path, CURRENT_SCENE.CLU)
@@ -324,6 +357,12 @@ function love.mousepressed(x, y, button, istouch, npresses)
 end
 
 function love.draw()
+	for _, xpk in pairs(CURRENT_SCENE.BACKGROUNDS) do
+		if xpk.Visible then
+			love.graphics.draw(xpk.Image, 0, 0)
+		end
+	end
+
 	for _, xpk in pairs(CURRENT_SCENE.XPKS) do
 		if xpk.Visible then
 			love.graphics.draw(xpk.Image, xpk.Entry.x, xpk.Entry.y)

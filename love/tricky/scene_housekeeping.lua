@@ -1,4 +1,6 @@
 local function OnLoad()
+	ShowBackgroundImage("Global/B_BASIC")
+
 	ShowImage("Global/new_adv_ylw")
 	ShowImage("Global/sel_adv_ylw")
 	ShowImage("Global/save_ylw")
@@ -42,6 +44,9 @@ return {
 			"Global/save_ylw.XPK",
 			"Global/sel_adv_ylw.XPK",
 			"Global/select_advntr_p.XPK",
+		},
+		Backgrounds = {
+			"Global/B_BASIC.XPK",
 		},
 	},
 }
