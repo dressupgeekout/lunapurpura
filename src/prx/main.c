@@ -32,6 +32,7 @@ static void usage(void);
 
 static char *progname = NULL;
 static char *path = NULL;
+static char *outname = NULL;
 static bool verbose = false;
 static enum PRXToolAction action = PRX_TOOL_ACTION_NONE;
 static uint32_t which_asset = 0;
@@ -103,10 +104,20 @@ main(int argc, char *argv[])
 					continue;
 				}
 
-				char total_filename[PRX_TOTAL_FILENAME_LEN];
-				snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
+				FILE *fp = NULL;
 
-				FILE *fp = fopen(total_filename, "wb");
+				if (outname) {
+					if (strcmp(outname, "-")) {
+						fp = fopen(outname, "wb");
+					} else {
+						fp = stdout;
+					}
+				} else {
+					char total_filename[PRX_TOTAL_FILENAME_LEN];
+					snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
+					fp = fopen(total_filename, "wb");
+				}
+
 				if (!fp) {
 					LPWarn(LP_SUBSYSTEM_PRX, "unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
 					goto fail;
@@ -115,7 +126,7 @@ main(int argc, char *argv[])
 				fclose(fp);
 
 				if (verbose) {
-					printf("x\t%s\n", total_filename);
+					fprintf(stderr, "x\t%s.%s\n", member->name, member->filetype);
 				}
 			}
 		}
@@ -151,7 +162,7 @@ parse_options(int *argc, char **argv[])
 {
 	int ch;
 
-	while ((ch = LPGetopt(*argc, *argv, "af:hn:r:tvx")) != -1) {
+	while ((ch = LPGetopt(*argc, *argv, "af:hn:o:r:tvx")) != -1) {
 		switch (ch) {
 		case 'a':
 			want_all_assets = true;
@@ -165,6 +176,9 @@ parse_options(int *argc, char **argv[])
 			break;
 		case 'n':
 			which_asset = (uint32_t)atoi(optarg);
+			break;
+		case 'o':
+			outname = optarg;
 			break;
 		case 'r':
 			which_asset = (uint32_t)atoi(optarg);
@@ -205,7 +219,7 @@ parse_options(int *argc, char **argv[])
 			return EXIT_FAILURE;
 		}
 
-		if (want_all_assets && which_asset) {
+		if (want_all_assets && (which_asset || outname)) {
 			usage();
 			return EXIT_FAILURE;
 		}
@@ -228,11 +242,11 @@ usage(void)
 	LPWarn(
 		LP_SUBSYSTEM_PRX,
 		"usage: %s [options ...] [file]\n"
-			"\t%s -t <file>                          List members\n"
-			"\t%s -x [-v] -n <ID> <file>             Extract a single member\n"
-			"\t%s -x [-v] -f <TYPE> -r <RID> <file>  Extract a single member by RID\n"
-			"\t%s -x [-v] -a <file>                  Extract all members\n"
-			"\t%s -h                                 Show this help message",
+			"\t%s -t <file>                                      List members\n"
+			"\t%s -x [-v] [-o <path>] -n <ID> <file>             Extract a single member\n"
+			"\t%s -x [-v] [-o <path>] -f <TYPE> -r <RID> <file>  Extract a single member by RID\n"
+			"\t%s -x [-v] -a <file>                              Extract all members\n"
+			"\t%s -h                                             Show this help message",
 		progname, progname, progname, progname, progname, progname
 	);
 }
