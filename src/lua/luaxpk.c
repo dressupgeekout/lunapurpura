@@ -17,11 +17,13 @@
 static int luaxpk_NewFromFile(lua_State *L);
 static int luaxpk_EntryAtIndex(lua_State *L);
 static int luaxpk_Decode(lua_State *L);
+static int luaxpk_DecodeTiledMode(lua_State *L);
 
 static const luaL_Reg functions[] = {
 	{"NewFromFile", luaxpk_NewFromFile},
 	{"EntryAtIndex", luaxpk_EntryAtIndex},
 	{"Decode", luaxpk_Decode},
+	{"DecodeTiledMode", luaxpk_DecodeTiledMode},
 	{NULL, NULL}
 };
 
@@ -127,6 +129,33 @@ luaxpk_Decode(lua_State *L)
 
 	return 1;
 }
+
+
+/*
+ * rgba (string) = XPK.DecodeTiledMode(xpk)
+ */
+static int
+luaxpk_DecodeTiledMode(lua_State *L)
+{
+	luaL_checkudata(L, 1, XPK_TYPE_NAME);
+	XPK **xpk = lua_touserdata(L, 1);
+	lua_pop(L, 1);
+
+	LPStatus status;
+	uint8_t *rgba = XPK_DecodeTiledMode(*xpk, &status);
+
+	if (status != LUNAPURPURA_OK) {
+		return luaL_error(L, "couldn't decode XPK in tiled mode: %s", LPStatusString(status));
+	}
+
+	lua_pushlstring(L, (const char *)rgba, 640*480*4);
+
+	/* pushlstring() made a copy, so let's free this */
+	XPKDecoder_FreeRGBA(rgba);
+
+	return 1;
+}
+
 
 /* ********** */
 
