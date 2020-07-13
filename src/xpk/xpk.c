@@ -130,15 +130,13 @@ XPK_NewFromFile(const char *path, LPStatus *status)
 
 	/* XXX check for malloc error */
 	xpk->offsets = calloc(xpk->n_entries, sizeof(uint32_t));
-	uint32_t **p = &xpk->offsets;
 
 	for (int i = 0; i < xpk->n_entries; i++) {
 		uint32_t offset;
 		ReadUint32(f, 1, &offset);
 		uint32_t absolute_offset = offsets_start_pos + offset;
-		**p = absolute_offset;
+		xpk->offsets[i] = absolute_offset;
 		xpk->entries[i]->offset = absolute_offset;
-		p++;
 	}
 
 	*status = LUNAPURPURA_OK;
@@ -176,4 +174,67 @@ void
 XPK_AttachCLU(XPK *xpk, CLU *clu)
 {
 	xpk->clu = clu;
+}
+
+
+/*
+ * Returns a 640x480 RGBA image. The whole thing is going to be in memory
+ * (1200 KB). The caller is expected to free the result.
+ */
+uint8_t *
+XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
+{
+	const unsigned int tile_count_x = 640/80; /* Number of tiles in the X direction */
+	const unsigned int tile_count_y = 480/60; /* Number of tiles in the Y direction */
+	size_t complete_cur_x = 0;
+	size_t complete_cur_y = 0;
+	LPStatus xpk_entry_decode_status;
+
+	uint8_t *complete_rgba = calloc(640*480*4, 1);
+
+	if (!complete_rgba) {
+		*status = LUNAPURPURA_ERROR;
+		return NULL;
+	}
+
+	XPKEntry *tile = NULL;
+
+	/* (1) For each tile... */
+	for (int tile_y = 0; tile_y < tile_count_y; tile_y++) {
+		for (int tile_x = 0; tile_x < tile_count_x; tile_x++) {
+			tile = XPK_EntryAtIndex(xpk, (tile_y*tile_count_x)+tile_x);
+			uint8_t *tile_rgba = XPKEntry_Decode(tile, &xpk_entry_decode_status);
+
+			if (xpk_entry_decode_status != LUNAPURPURA_OK) {
+				free(complete_rgba);
+				*status = xpk_entry_decode_status;
+				return NULL;
+			}
+
+			/*
+			 * The X and Y coordinates of the top-left corner of the current tile,
+			 * in terms of the complete picture.
+			 */
+			complete_cur_x = tile->width * tile_x;
+			complete_cur_y = tile->height * tile_y;
+
+			/* (2) ...splat its contents into the correct spot in the grander image. */
+			for (int y = 0; y < tile->height; y++) {
+				for (int x = 0; x < tile->width; x++) {
+					int this_color_pos = (y * tile->width * 4) + (x * 4);
+					int this_pixel_pos = (complete_cur_y * 640 * 4) + (complete_cur_x * 4);
+					complete_rgba[this_pixel_pos+0] = tile_rgba[this_color_pos+0];
+					complete_rgba[this_pixel_pos+1] = tile_rgba[this_color_pos+1];
+					complete_rgba[this_pixel_pos+2] = tile_rgba[this_color_pos+2];
+					complete_rgba[this_pixel_pos+3] = tile_rgba[this_color_pos+3];
+					complete_cur_x++;
+				}
+				complete_cur_y++;
+				complete_cur_x -= tile->width;
+			}
+		}
+	}
+
+	*status = LUNAPURPURA_OK;
+	return complete_rgba;
 }

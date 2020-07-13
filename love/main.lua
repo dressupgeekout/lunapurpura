@@ -11,38 +11,6 @@ require("games")
 
 --------- --------- ---------
 
-local function dump_clu(clu)
-	print("========")
-	print(clu)
-	print("========")
-	for i = 1, 256, 1 do
-		r, g, b = CLU.ColorAtIndex(clu, i)
-		print(i, r, g, b)
-	end
-	print("========")
-end
-
-local function draw_clus()
-	for row = 1, 16, 1 do
-		for column = 1, 16, 1 do
-			local r, g, b = CLU.ColorAtIndex(clus[current_clu_index], (row-1)*16+column)
-			local entry_size = 20
-			love.graphics.setColor(r/255, g/255, b/255, 1.0)
-			love.graphics.rectangle("fill", column*entry_size, row*entry_size, entry_size, entry_size)
-		end
-	end
-
-	love.graphics.setColor(1, 1, 1, 1)
-
-	if mouseover_entry then
-		love.graphics.setColor(1, 1, 1, 1)
-		local r, g, b = CLU.ColorAtIndex(clus[current_clu_index], mouseover_entry+1)
-		love.graphics.print(string.format("Entry %d (%d,%d,%d)", mouseover_entry, r, g, b), 300, 0)
-	end
-end
-
---------- --------- ---------
-
 --[[XXX In reality we'd refer to it by its number, or something along those
 lines.]]
 local function LoadCLU(path)
@@ -283,39 +251,9 @@ function love.keypressed(key, scancode)
 	end
 
 	CURRENT_SCENE.FUNCS.KeyPressed(key, scancode)
-
-	if cluview then
-		if key == "left" then
-			if current_clu_index == 1 then
-				current_clu_index = #clus
-			else
-				current_clu_index = current_clu_index - 1
-			end
-		end
-	
-		if key == "right" then
-			if current_clu_index == #clus then
-				current_clu_index = 1
-			else
-				current_clu_index = current_clu_index + 1
-			end
-		end
-	
-		if key == "d" then
-			dump_clu(clus[current_clu_index])
-		end
-	end
 end
 
 function love.mousemoved(x, y, dx, dy, istouch)
-	if cluview then
-		local entry_size = 20
-		if x >= entry_size and x <= 17*entry_size and y >= entry_size and y <= 17*entry_size then
-			mouseover_entry = math.floor(((y-entry_size) / entry_size)) * 16
-			mouseover_entry = mouseover_entry + ((x-entry_size) / entry_size)
-		end
-	end
-
 	CURRENT_SCENE.FUNCS.MouseMoved(x, y, dx, dy, istouch)
 end
 
