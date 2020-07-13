@@ -19,7 +19,11 @@
 
 #define PARSE_OPTIONS_OK (-1)
 
-#define PRX_TOTAL_FILENAME_LEN (PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN)
+/*
+ * A RID is a 32-bit unsigned int, whose decimal expansion takes up to 10
+ * characters, plus one for the separator. Therefore, 11.
+ */
+#define PRX_TOTAL_FILENAME_LEN (11 + PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN)
 
 enum PRXToolAction {
 	PRX_TOOL_ACTION_NONE,
@@ -114,7 +118,7 @@ main(int argc, char *argv[])
 					}
 				} else {
 					char total_filename[PRX_TOTAL_FILENAME_LEN];
-					snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%s.%s", member->name, member->filetype);
+					snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%u-%s.%s", member->rid, member->name, member->filetype);
 					fp = fopen(total_filename, "wb");
 				}
 
