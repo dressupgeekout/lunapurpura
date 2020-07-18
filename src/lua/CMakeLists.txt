@@ -21,23 +21,6 @@ target_link_libraries(luaclu ${LIBLUA} lpclu lputil)
 
 ########## ########## ##########
 
-add_library(luaprd SHARED
-  luaprd.c
-)
-
-target_include_directories(luaprd PUBLIC
-  ${LUA_INCLUDEDIR}
-)
-
-target_include_directories(luaprd PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/../prd
-  ${CMAKE_CURRENT_LIST_DIR}/../lputil
-)
-
-target_link_libraries(luaprd ${LIBLUA} lpprd lputil)
-
-########## ########## ##########
-
 add_library(luaprx SHARED
   luaprx.c
 )
