@@ -21,8 +21,11 @@ enum MMFWToolMode {
 	MMFW_TOOL_MODE_EXTRACT,
 };
 
-const char *progname = NULL;
-enum MMFWToolMode mode = MMFW_TOOL_MODE_NONE;
+static const char *progname = NULL;
+static enum MMFWToolMode mode = MMFW_TOOL_MODE_NONE;
+static bool want_extract_all = false;
+static int which_member = -1;
+static bool verbose = false;
 
 /* ********** */
 
@@ -32,9 +35,10 @@ usage(void)
 	LPLog(
 		LP_SUBSYSTEM_MMFW,
 		"usage: %s [options ...] [file]\n"
-		"\t%s -t <file>\n"
-		"\t%s -x <file>",
-		progname, progname, progname
+		"\t%s -t <file>                List archive members\n"
+		"\t%s -x [-v] -a <file>        Extract all members\n"
+		"\t%s -x [-v] -n <id> <file>   Extract a single member",
+		progname, progname, progname, progname
 	);
 }
 
@@ -51,17 +55,26 @@ main(int argc, char *argv[])
 
 	int ch;
 
-	while ((ch = LPGetopt(argc, argv, "htx")) != -1) {
+	while ((ch = LPGetopt(argc, argv, "ahn:tvx")) != -1) {
 		switch (ch) {
+		case 'a':
+			want_extract_all = true;
+			break;
 		case 'h':
 			usage();
 			return EXIT_SUCCESS;
+			break;
+		case 'n':
+			which_member = atoi(optarg);
 			break;
 		case 't':
 			mode = MMFW_TOOL_MODE_LIST;
 			break;
 		case 'x':
 			mode = MMFW_TOOL_MODE_EXTRACT;
+			break;
+		case 'v':
+			verbose = true;
 			break;
 		case '?': /* FALLTHROUGH */
 		default:
@@ -82,6 +95,16 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	if ((mode == MMFW_TOOL_MODE_EXTRACT) && want_extract_all && which_member >= 0) {
+		usage();
+		return EXIT_FAILURE;
+	}
+
+	if ((mode == MMFW_TOOL_MODE_EXTRACT) && !want_extract_all && (which_member < 0)) {
+		usage();
+		return EXIT_FAILURE;
+	}
+
 	const char *path = argv[0];
 	LPStatus status;
 	MMFW *mmfw = MMFW_NewFromFile(path, &status);
@@ -95,15 +118,31 @@ main(int argc, char *argv[])
 	}
 
 	LPLog(
-		LP_SUBSYSTEM_MMFW, ">> \"%s\" MMFW archive with %d members",
+		LP_SUBSYSTEM_MMFW, "\"%s\" MMFW archive with %d members",
 		MMFW_KindString(mmfw), mmfw->n_entries
 	);
 
-	for (uint16_t i = 0; i < mmfw->n_entries; i++) {
+	uint16_t min_i = 0;
+	uint16_t max_i = 0;
+
+	switch (mode) {
+	case MMFW_TOOL_MODE_LIST:
+		min_i = 0;
+		max_i = mmfw->n_entries;
+		break;
+	case MMFW_TOOL_MODE_EXTRACT:
+		min_i = want_extract_all ? 0 : which_member;
+		max_i = want_extract_all ? mmfw->n_entries : which_member+1;
+		break;
+	default:
+		; /* NOTREACHED */
+	}
+
+	for (uint16_t i = min_i; i < max_i; i++) {
 		switch (mode) {
 		case MMFW_TOOL_MODE_LIST:
 			{
-				printf("%-32s\t%u\n", mmfw->names[i], mmfw->offsets[i]);
+				printf("%d\t%-32s\t%u\n", i, mmfw->names[i], mmfw->offsets[i]);
 			}
 			break;
 		case MMFW_TOOL_MODE_EXTRACT:
@@ -113,7 +152,9 @@ main(int argc, char *argv[])
 				fwrite(MMFW_EntryData(entry), 1, MMFW_EntryLength(entry), outf);
 				fclose(outf);
 				MMFW_FreeEntry(entry);
-				fprintf(stderr, "x\t%s\n", mmfw->names[i]);
+				if (verbose) {
+					fprintf(stderr, "x\t%s\n", mmfw->names[i]);
+				}
 			}
 			break;
 		default:
