@@ -55,6 +55,7 @@ struct MMFW {
 	uint16_t n_entries;
 	uint32_t *offsets;
 	MMFWEntryName *names;
+	long kind_metadata_start_pos;
 };
 typedef struct MMFW MMFW;
 

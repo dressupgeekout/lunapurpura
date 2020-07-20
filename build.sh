@@ -25,7 +25,7 @@ cd ${build_dir}
   make "$@"
 
   if [ "${lua_bindings}" != "OFF" ]; then
-    for lib in clu prd prx xpk; do
+    for lib in clu prx xpk; do
       cp -v ./src/lua/liblua${lib}.dylib ../${love_dir}/lua${lib}.so
     done
   fi

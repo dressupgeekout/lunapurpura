@@ -1,5 +1,5 @@
 /*
- * PRX main.c
+ * presagearchive main.c
  *
  * This file is part of Luna Purpura.
  */
@@ -12,8 +12,7 @@
 
 #include <lputil.h>
 
-#include "prx.h"
-#include "prxmember.h"
+#include "presagearchive.h"
 
 /* ********** */
 
@@ -23,7 +22,7 @@
  * A RID is a 32-bit unsigned int, whose decimal expansion takes up to 10
  * characters, plus one for the separator. Therefore, 11.
  */
-#define PRX_TOTAL_FILENAME_LEN (11 + PRXMEMBER_NAME_LEN + PRXMEMBER_FILETYPE_LEN)
+#define TOTAL_FILENAME_LEN (11 + PRESAGEARCHIVEMEMBER_NAME_LEN + PRESAGEARCHIVEMEMBER_FILETYPE_LEN)
 
 enum PRXToolAction {
 	PRX_TOOL_ACTION_NONE,
@@ -31,14 +30,16 @@ enum PRXToolAction {
 	PRX_TOOL_ACTION_EXTRACT,
 };
 
-static int parse_options(int *argc, char **argv[]);
+static int parse_options(int argc, char *argv[]);
 static void usage(void);
 
 static char *progname = NULL;
-static char *path = NULL;
+static char *path1 = NULL;
+static char *path2 = NULL;
 static char *outname = NULL;
 static bool verbose = false;
 static enum PRXToolAction action = PRX_TOOL_ACTION_NONE;
+static PresageArchiveKind kind;
 static uint32_t which_asset = 0;
 static char *which_filetype = NULL;
 static bool want_asset_by_rid = false;
@@ -62,16 +63,30 @@ main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	if ((rv = parse_options(&argc, &argv)) != PARSE_OPTIONS_OK) {
+	if ((rv = parse_options(argc, argv)) != PARSE_OPTIONS_OK) {
 		return rv;
 	}
 
+	if (verbose) {
+		switch (kind) {
+		case PRESAGE_ARCHIVE_KIND_PRDPRS:
+			LPWarn(LP_SUBSYSTEM_PRX, "%s", "Assuming this is a PRD/PRS pair");
+			break;
+		case PRESAGE_ARCHIVE_KIND_PRX:
+			LPWarn(LP_SUBSYSTEM_PRX, "%s", "Assuming this is a single PRX file");
+			break;
+		}
+	}
+
 	LPStatus status;
+	PresageArchive *archive = PresageArchive_NewFromFiles(path1, path2, &status);
 
-	PRX *prx = PRX_NewFromFile(path, (action == PRX_TOOL_ACTION_EXTRACT), &status);
-
-	if (!prx) {
-		LPWarn(LP_SUBSYSTEM_PRX, "error: %s: %s", path, LPStatusString(status));
+	if (!archive) {
+		if (kind == PRESAGE_ARCHIVE_KIND_PRDPRS) {
+			LPWarn(LP_SUBSYSTEM_PRX, "error: header=%s data=%s: %s", path1, path2, LPStatusString(status));
+		} else {
+			LPWarn(LP_SUBSYSTEM_PRX, "error: %s: %s", path1, LPStatusString(status));
+		}
 		if (status == LUNAPURPURA_CANTOPENFILE) {
 			LPWarn(LP_SUBSYSTEM_PRX, "%s", strerror(errno));
 		}
@@ -88,18 +103,19 @@ main(int argc, char *argv[])
 			int min_i;
 			int max_i;
 			min_i = want_all_assets ? 1 : which_asset;
-			max_i = want_all_assets ? prx->n_entries : which_asset;
+			max_i = want_all_assets ? archive->n_entries : which_asset;
 
 			for (int i = min_i; i <= max_i; i++) {
-				PRXMember *member = NULL;
+				PresageArchiveMember *member = NULL;
 
 				if (want_asset_by_rid) {
-					member = PRX_MemberWithResourceId(prx, which_filetype, which_asset);
+					member = PresageArchive_MemberWithResourceId(archive, which_filetype, which_asset);
 				} else {
-					member = prx->members[i-1];
+					member = archive->members[i-1];
 				}
 
 				if (!member) {
+					const char *path = (kind == PRESAGE_ARCHIVE_KIND_PRX) ? path1 : path2;
 					if (want_asset_by_rid) {
 						LPWarn(LP_SUBSYSTEM_PRX, "%s: no such %s member with RID %ld", path, which_filetype, which_asset);
 					} else {
@@ -117,8 +133,8 @@ main(int argc, char *argv[])
 						fp = stdout;
 					}
 				} else {
-					char total_filename[PRX_TOTAL_FILENAME_LEN];
-					snprintf(total_filename, PRX_TOTAL_FILENAME_LEN, "%u-%s.%s", member->rid, member->name, member->filetype);
+					char total_filename[TOTAL_FILENAME_LEN];
+					snprintf(total_filename, TOTAL_FILENAME_LEN, "%u-%s.%s", member->rid, member->name, member->filetype);
 					fp = fopen(total_filename, "wb");
 				}
 
@@ -126,7 +142,10 @@ main(int argc, char *argv[])
 					LPWarn(LP_SUBSYSTEM_PRX, "unable to extract member #%d (%s): %s", i, member->name, strerror(errno));
 					goto fail;
 				}
+
+				(void)PresageArchive_DataForMember(archive, member);
 				fwrite(member->data, member->size, 1, fp);
+				PresageArchiveMember_FreeData(member);
 				fclose(fp);
 
 				if (verbose) {
@@ -138,9 +157,9 @@ main(int argc, char *argv[])
 	case PRX_TOOL_ACTION_LIST:
 		{
 			/* Merely print a list of all members. */
-			printf(">> %d entries:\n", prx->n_entries);
-			for (int i = 0; i < prx->n_entries; i++) {
-				PRXMember *member = prx->members[i];
+			printf(">> %d entries:\n", archive->n_entries);
+			for (int i = 0; i < archive->n_entries; i++) {
+				PresageArchiveMember *member = archive->members[i];
 				printf("%-6d%-18s%-6s%-8d%-8d\n",
 					member->internal_id-1, member->name, member->filetype, member->rid,
 					member->size);
@@ -152,21 +171,21 @@ main(int argc, char *argv[])
 		break;
 	}
 
-	PRX_Free(prx);
+	PresageArchive_Close(archive);
 	return EXIT_SUCCESS;
 
 fail:
-	PRX_Free(prx);
+	PresageArchive_Close(archive);
 	return EXIT_FAILURE;
 }
 
 
 static int
-parse_options(int *argc, char **argv[])
+parse_options(int argc, char *argv[])
 {
 	int ch;
 
-	while ((ch = LPGetopt(*argc, *argv, "af:hn:o:r:tvx")) != -1) {
+	while ((ch = LPGetopt(argc, argv, "af:hn:o:r:tvx")) != -1) {
 		switch (ch) {
 		case 'a':
 			want_all_assets = true;
@@ -204,10 +223,10 @@ parse_options(int *argc, char **argv[])
 			return EXIT_FAILURE;
 		}
 	}
-	*argc -= optind;
-	*argv += optind;
+	argc -= optind;
+	argv += optind;
 
-	if (*argc < 1) {
+	if (argc < 1) {
 		usage();
 		return EXIT_FAILURE;
 	}
@@ -234,7 +253,14 @@ parse_options(int *argc, char **argv[])
 		}
 	}
 
-	path = *argv[0];
+	if (argc >= 1) path1 = argv[0];
+	if (argc >= 2) path2 = argv[1];
+
+	if (path1 && path2) {
+		kind = PRESAGE_ARCHIVE_KIND_PRDPRS;
+	} else {
+		kind = PRESAGE_ARCHIVE_KIND_PRX;
+	}
 
 	return PARSE_OPTIONS_OK;
 }
@@ -245,7 +271,7 @@ usage(void)
 {
 	LPWarn(
 		LP_SUBSYSTEM_PRX,
-		"usage: %s [options ...] [file]\n"
+		"usage: %s [options ...] [file1] [file2]\n"
 			"\t%s -t <file>                                      List members\n"
 			"\t%s -x [-v] [-o <path>] -n <ID> <file>             Extract a single member\n"
 			"\t%s -x [-v] [-o <path>] -f <TYPE> -r <RID> <file>  Extract a single member by RID\n"
