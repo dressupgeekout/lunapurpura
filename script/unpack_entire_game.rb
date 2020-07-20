@@ -18,16 +18,22 @@ def cmd(str)
   system(str)
 end
 
+def h(str)
+  return Shellwords.escape(str)
+end
+
 PROGNAME = File.basename($0)
 
 resource_dir = nil
 out_dir = Pathname.new(".").expand_path
 prxtool = "prx"
+expect_prdprs = false
 
 parser = OptionParser.new do |opts|
   opts.banner = "usage: #{PROGNAME} [options ...] <RESOURCE-DIR>"
   opts.on("-o", "--outdir PATH") { |path| out_dir = File.expand_path(path) }
   opts.on("--prx PATH", "path to prx(1) tool") { |path| prxtool = File.expand_path(path) }
+  opts.on("--new-school", "This is Rockett's New School data") { expect_prdprs = true }
 end
 
 parser.parse!(ARGV)
@@ -47,8 +53,17 @@ if not File.directory?(resource_dir)
   exit 1
 end
 
-Dir.glob("#{resource_dir}/**/*.PRX").each do |prx|
-  new_dir = File.join(out_dir, Pathname.new(prx).relative_path_from(Pathname.new(resource_dir)).sub(/\.PRX$/, ""))
-  FileUtils.mkdir_p(new_dir)
-  cmd %Q(cd #{Shellwords.escape(new_dir)} && #{Shellwords.escape(prxtool)} -x -a #{Shellwords.escape(File.realpath(prx))})
+if expect_prdprs
+  Dir.glob("#{resource_dir}/**/*.PRD").each do |prd|
+    prs = prd.sub(/\.PRD$/, ".PRS")
+    new_dir = File.join(out_dir, Pathname.new(prd).relative_path_from(Pathname.new(resource_dir)).sub(/\.PRD$/, ""))
+    FileUtils.mkdir_p(new_dir)
+    cmd %Q(cd #{h(new_dir)} && #{h(prxtool)} -x -a #{h(File.realpath(prd))} #{h(File.realpath(prs))})
+  end
+else
+  Dir.glob("#{resource_dir}/**/*.PRX").each do |prx|
+    new_dir = File.join(out_dir, Pathname.new(prx).relative_path_from(Pathname.new(resource_dir)).sub(/\.PRX$/, ""))
+    FileUtils.mkdir_p(new_dir)
+    cmd %Q(cd #{h(new_dir)} && #{h(prxtool)} -x -a #{h(File.realpath(prx))})
+  end
 end
