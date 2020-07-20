@@ -138,35 +138,56 @@ main(int argc, char *argv[])
 			XPKEntry_Pretty(XPK_EntryAtIndex(xpk, i));
 		}
 
-		/* We can only decode the 0th entry for now. */
-		XPKEntry *entry = XPK_EntryAtIndex(xpk, 0);
+		for (int i = 0; i < xpk->n_entries; i++) {
+			XPKEntry *entry = XPK_EntryAtIndex(xpk, i);
 
-		rgba = XPKEntry_Decode(entry, &status);
+			rgba = XPKEntry_Decode(entry, &status);
 
-		if (status != LUNAPURPURA_OK) {
-			LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode: %s", LPStatusString(status));
-			goto fail;
-		}
-
-#ifdef LUNAPURPURA_PNG_SUPPORT
-		if (out_path && !want_png)
-#else
-		if (out_path)
-#endif
-		{
-			FILE *out_f = fopen(out_path, "wb");
-			fwrite(rgba, 4, entry->width*entry->height, out_f);
-			fclose(out_f);
-		}
-
-#ifdef LUNAPURPURA_PNG_SUPPORT
-		if (out_path && want_png) {
-			if ((status = XPKDecoder_RGBAToPNG(rgba, entry, out_path)) != LUNAPURPURA_OK) {
-				LPWarn(LP_SUBSYSTEM_XPK, "couldn't write PNG!: %s", LPStatusString(status));
+			if (status != LUNAPURPURA_OK) {
+				LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode: %s", LPStatusString(status));
 				goto fail;
 			}
-		}
+
+			if (!(entry->width && entry->height)) {
+				LPWarn(LP_SUBSYSTEM_XPK, "skipping entry %d with zero width and/or height", i);
+				continue;
+			}
+
+			char real_out_path[512];
+
+			if (out_path) {
+				if (xpk->n_entries > 1) {
+					/*
+					 * The number of XPK entries is a uint16, which means the largest
+					 * possible frame number is 65535, which is 5 decimal digits long.
+					 */
+					snprintf(real_out_path, sizeof(real_out_path), "%05d-%s", i, out_path);
+				} else {
+					snprintf(real_out_path, sizeof(real_out_path), "%s", out_path);
+				}
+				LPWarn(LP_SUBSYSTEM_XPK, "decoding entry #%d to %s", i, real_out_path);
+			}
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+			if (out_path && !want_png)
+#else
+			if (out_path)
 #endif
+			{
+				FILE *out_f = fopen(real_out_path, "wb");
+				fwrite(rgba, 4, entry->width*entry->height, out_f);
+				fclose(out_f);
+			}
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+			if (out_path && want_png) {
+				if ((status = XPKDecoder_RGBAToPNG(rgba, entry, real_out_path)) != LUNAPURPURA_OK) {
+					LPWarn(LP_SUBSYSTEM_XPK, "couldn't write PNG!: %s", LPStatusString(status));
+					goto fail;
+				}
+			}
+#endif
+		}
 	}
 
 	XPKDecoder_FreeRGBA(rgba);
