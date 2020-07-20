@@ -22,6 +22,7 @@ const char *MMFWSoundEntryFormat_String(const MMFWSoundEntryFormat fmt);
 
 
 struct MMFWSoundEntry {
+	uint8_t *unknown;
 	MMFWSoundEntryFormat fmt;
 	uint32_t length;
 	uint8_t *data;
@@ -30,5 +31,7 @@ typedef struct MMFWSoundEntry MMFWSoundEntry;
 
 MMFWSoundEntry *MMFWSoundEntry_New(MMFW *mmfw, int i);
 void MMFWSoundEntry_Free(MMFWSoundEntry *sound);
+uint8_t *MMFWSoundEntry_AForEntry(MMFW *mmfw, int i);
+MMFWSoundEntryFormat MMFWSoundEntry_FormatForEntry(MMFW *mmfw, int i);
 
 #endif /* LUNAPURPURA_MMFWSOUND_H */

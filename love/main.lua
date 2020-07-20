@@ -3,7 +3,6 @@ VERSION = "0.0.0a"
 local serpent = require("serpent")
 
 local CLU = require("luaclu")
-local PRD = require("luaprd")
 local PRX = require("luaprx")
 local XPK = require("luaxpk")
 
@@ -202,7 +201,6 @@ function love.load(argv, unfiltered_argv)
 	print(string.format("*** Luna Purpura % s***", VERSION))
 
 	print(string.format("CLU -> %s", serpent.line(CLU)))
-	print(string.format("PRD -> %s", serpent.line(PRD)))
 	print(string.format("PRX -> %s", serpent.line(PRX)))
 	print(string.format("XPK -> %s", serpent.line(XPK)))
 

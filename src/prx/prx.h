@@ -7,28 +7,25 @@
 #ifndef LUNAPURPURA_PRX_H
 #define LUNAPURPURA_PRX_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #include <lputil.h>
 
-#include "prxmember.h"
+/* Forward declarations. */
+struct PresageArchive;
+typedef struct PresageArchive PresageArchive;
+
 
 #define LP_SUBSYSTEM_PRX "prx"
 
 #define PRX_MAGIC 1
 
 struct PRX {
-	uint16_t n_entries;
-	uint32_t data_offset_start;
-	PRXMember **members;
+	FILE *fp;
 };
 typedef struct PRX PRX;
 
-PRX *PRX_NewFromFile(const char *path, bool want_data, LPStatus *status);
-void PRX_Free(PRX *prx);
-uint32_t PRX_AbsoluteOffsetForMember(const PRX *prx, const int index);
-PRXMember *PRX_MemberWithResourceId(const PRX *prx,  char *filetype, uint32_t rid);
+PRX *PRX_New(const char *path, LPStatus *status);
+void PRX_Close(PRX *prx);
 
 #endif /* LUNAPURPURA_PRX_H */
