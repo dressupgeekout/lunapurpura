@@ -142,7 +142,24 @@ main(int argc, char *argv[])
 		switch (mode) {
 		case MMFW_TOOL_MODE_LIST:
 			{
-				printf("%d\t%-32s\t%u\n", i, mmfw->names[i], mmfw->offsets[i]);
+				MMFWEntry *entry = MMFW_EntryAtIndex(mmfw, i);
+				switch (entry->kind) {
+				case MMFW_KIND_SOUNDS:
+					{
+						uint8_t *unknown = entry->entry.sound->unknown;
+						printf(
+							"%d\t%-32s\t%s\t(%d,%d,%d,%d)\t%u\n",
+							i,
+							mmfw->names[i],
+							MMFWSoundEntryFormat_String(entry->entry.sound->fmt),
+							unknown[0], unknown[1], unknown[2], unknown[3],
+							mmfw->offsets[i]
+						);
+					}
+					break;
+				default:
+					printf("%d\t%-32s\t%u\n", i, mmfw->names[i], mmfw->offsets[i]);
+				}
 			}
 			break;
 		case MMFW_TOOL_MODE_EXTRACT:
