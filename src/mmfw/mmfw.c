@@ -81,6 +81,12 @@ MMFW_NewFromFile(const char *path, LPStatus *status)
 		snprintf(mmfw->names[i], MMFW_ENTRY_NAME_LEN, "%s", name);
 	}
 
+	/*
+	 * What follows is metadata that is specific to the various kinds of MMFW
+	 * archive. So let's keep track of our current file position.
+	 */
+	mmfw->kind_metadata_start_pos = ftell(mmfw->fp);
+
 	*status = LUNAPURPURA_OK;
 	return mmfw;
 

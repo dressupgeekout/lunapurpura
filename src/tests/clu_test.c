@@ -3,14 +3,13 @@
  */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <lputil.h>
 #include <prx.h>
-#include <prxmember.h>
+#include <presagearchive.h>
 #include <clu.h>
 
 #define MSGPREFIX "(CLU test)"
@@ -26,13 +25,14 @@ main(int argc, char *argv[])
 	char *path = argv[1];
 	uint32_t rid = (uint32_t)atoi(argv[2]);
 
-	PRXMember *member = NULL;
+	PresageArchiveMember *member = NULL;
 	CLU *clu = NULL;
 
 	LPStatus status;
-	PRX *prx = PRX_NewFromFile(path, true, &status);
+	/* XXX PRX only */
+	PresageArchive *archive = PresageArchive_NewFromFiles(path, NULL, &status);
 
-	if (!prx) {
+	if (!archive) {
 		LPWarn(MSGPREFIX, "couldn't read %s: %s", path, LPStatusString(status));
 		if (status == LUNAPURPURA_CANTOPENFILE) {
 			LPWarn(MSGPREFIX, "%s", strerror(errno));
@@ -40,7 +40,7 @@ main(int argc, char *argv[])
 		goto fail;
 	}
 
-	member = PRX_MemberWithResourceId(prx, "CLU", rid);
+	member = PresageArchive_MemberWithResourceId(archive, "CLU", rid);
 
 	if (!member) {
 		LPWarn(MSGPREFIX, "couldn't find PRX member %ld", rid);
@@ -62,11 +62,11 @@ main(int argc, char *argv[])
 	}
 
 	CLU_Free(clu);
-	PRX_Free(prx);
+	PresageArchive_Close(archive);
 	return EXIT_SUCCESS;
 
 fail:
 	CLU_Free(clu);
-	PRX_Free(prx);
+	PresageArchive_Close(archive);
 	return EXIT_FAILURE;
 }
