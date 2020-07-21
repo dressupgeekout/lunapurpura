@@ -242,6 +242,14 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 						}
 					}
 					break;
+				case XPKINST_BIGLINEREPEAT:
+					NEWLINE(d);
+					d->line_repeat = 16 + argument;
+					d->line_repeat_loc = ftell(entry->xpk->file);
+#ifdef LUNAPURPURA_XPK_TRACE
+					LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT %d", argument);
+#endif
+					break;
 				case XPKINST_SETXNL:
 					if (argument) {
 						d->cur_x = argument;
