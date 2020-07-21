@@ -337,11 +337,19 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 #endif
 					break;
 				case XPKINST_DIRECTNL:
-					d->direct_counter = argument;
-					NEWLINE(d);
+					if (argument) {
+						d->direct_counter = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", argument);
+						LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", argument);
 #endif
+					} else {
+						ReadUint16(entry->xpk->file, 1, &d->next_holder);
+						d->direct_counter = d->next_holder;
+#ifdef LUNAPURPURA_XPK_TRACE
+						LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", d->next_holder);
+#endif
+					}
+					NEWLINE(d);
 					break;
 				case XPKINST_BIGDIRECTNL:
 					d->direct_counter = (16 + argument);
