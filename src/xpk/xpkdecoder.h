@@ -17,6 +17,7 @@ enum XPKDecoderInstruction {
 	XPKINST_REPEAT = 0x0, /* Opcode 0 instead of argument 0 ... */
 	XPKINST_RLENEXT = 0x00, /* ... BUT, opcode 0 AND argument 0 is a special case */
 	XPKINST_REPEAT_END = 0x01,
+	XPKINST_BIGREPEAT = 0x1,
 	XPKINST_XSKIP = 0x2,
 	XPKINST_BIGXSKIP = 0x3,
 	XPKINST_RLE = 0x4,

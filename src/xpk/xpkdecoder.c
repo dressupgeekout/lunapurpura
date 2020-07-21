@@ -151,6 +151,13 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 						}
 					}
 					break;
+				case XPKINST_BIGREPEAT:
+					d->repeat = 16 + argument;
+					d->repeat_loc = ftell(entry->xpk->file);
+#ifdef LUNAPURPURA_XPK_TRACE
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGREPEAT %d", 16+argument);
+#endif
+					break;
 				case XPKINST_XSKIP:
 					if (argument) {
 						d->cur_x += argument;
