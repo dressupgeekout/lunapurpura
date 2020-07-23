@@ -2,6 +2,10 @@
  * Lua bindings to Luna Purpura's CLU library
  */
 
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -11,42 +15,16 @@
 
 #define CLU_TYPE_NAME "T_CLU" 
 
-static int luaclu_NewFromData(lua_State *L);
 static int luaclu_NewFromFile(lua_State *L);
 static int luaclu_ColorAtIndex(lua_State *L);
 
 static const luaL_Reg functions[] = {
-	{"NewFromData", luaclu_NewFromData},
 	{"NewFromFile", luaclu_NewFromFile},
 	{"ColorAtIndex", luaclu_ColorAtIndex},
 	{NULL, NULL}
 };
 
 /* ********** */
-
-/*
- * clu = CLU.NewFromData(data)
- */
-static int
-luaclu_NewFromData(lua_State *L)
-{
-	const char *data = luaL_checkstring(L, 1);
-	lua_pop(L, 1);
-
-	CLU **clu = lua_newuserdata(L, sizeof(CLU));
-	luaL_getmetatable(L, CLU_TYPE_NAME);
-	lua_setmetatable(L, -2);
-
-	LPStatus status;
-	*clu = CLU_NewFromData((uint8_t*)data, &status);
-
-	if (status != LUNAPURPURA_OK) {
-		return luaL_error(L, "%s", LPStatusString(status));
-	}
-
-	return 1;
-}
-
 
 /*
  * clu = CLU.NewFromFile(path)
@@ -59,11 +37,20 @@ luaclu_NewFromFile(lua_State *L)
 	CLU **clu = lua_newuserdata(L, sizeof(CLU));
 	luaL_getmetatable(L, CLU_TYPE_NAME);
 	lua_setmetatable(L, -2);
+
+	FILE *fp = fopen(path, "rb");
+	if (!fp) {
+		return luaL_error(L, "%s: %s", path, strerror(errno));
+	}
+
 	LPStatus status;
-	*clu = CLU_NewFromFile(path, &status);
+	*clu = CLU_NewFromFile(fp, &status);
+	fclose(fp);
+
 	if (status != LUNAPURPURA_OK) {
 		return luaL_error(L, "%s", LPStatusString(status));
 	}
+
 	return 1;
 }
 

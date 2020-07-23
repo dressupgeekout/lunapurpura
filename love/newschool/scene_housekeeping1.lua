@@ -1,16 +1,16 @@
 local function OnLoad()
-	ShowImage("GLOBAL/_down_h")
-	ShowImage("GLOBAL/_list")
-	ShowImage("GLOBAL/_up_h")
-	ShowImage("GLOBAL/_ok_n")
+	ShowImage("GLOBAL/63301-list")
+	ShowImage("GLOBAL/63700-ok_n")
+	ShowImage("GLOBAL/63704-up_h")
+	ShowImage("GLOBAL/63705-down_h")
 end
 
 local function MouseMoved(x, y, dx, dy, istouch)
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_ok_n", "GLOBAL/_ok_h")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/63700-ok_n", "GLOBAL/63701-ok_h")
 end
 
 local function MousePressed(x, y, button, istouch, npresses)
-	if IsOverWidget(x, y, "GLOBAL/_ok_h") then
+	if IsOverWidget(x, y, "GLOBAL/63701-ok_h") then
 		LoadScene("housekeeping2")
 	end
 end
@@ -21,14 +21,14 @@ return {
 	MousePressed = MousePressed,
 
 	Template = {
-		CLU = "GLOBAL/_HKEEP.CLU",
+		CLU = "GLOBAL/63000-HKEEP.CLU",
 		XPKS = {
-			"GLOBAL/_down_h.XPK",
-			"GLOBAL/_list.XPK",
-			"GLOBAL/_new_h.XPK",
-			"GLOBAL/_ok_h.XPK",
-			"GLOBAL/_ok_n.XPK",
-			"GLOBAL/_up_h.XPK",
+			"GLOBAL/63301-list.XPK",
+			"GLOBAL/63600-new_h.XPK",
+			"GLOBAL/63700-ok_n.XPK",
+			"GLOBAL/63701-ok_h.XPK",
+			"GLOBAL/63704-up_h.XPK",
+			"GLOBAL/63705-down_h.XPK",
 		},
 	},
 }

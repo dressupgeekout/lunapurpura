@@ -18,18 +18,13 @@
 uint8_t CLU_MAGIC[CLU_MAGIC_LEN] = {0, 0, 0, 0, 128, 0, 0, 255};
 
 /*
- * Creates a new CLU structure from the region of memory indicated by the
- * provided pointer.
+ * The FILE pointer is expected to have already been advanced to the
+ * appropriate position.
  *
- * In most situations like this, we'd require the user to pass in a length,
- * but all CLUs have exactly the same length, so that's not necessary.
- *
- * This function creates a structure which is way more useful than the raw
- * region passed into it. Therefore, you ought to free the region when
- * successful.
+ * Don't forget to free the result with CLU_Free() you're done.
  */
 CLU *
-CLU_NewFromData(uint8_t *region, LPStatus *status)
+CLU_NewFromFile(FILE *fp, LPStatus *status)
 {
 	CLU *clu = malloc(sizeof(CLU));
 
@@ -39,83 +34,30 @@ CLU_NewFromData(uint8_t *region, LPStatus *status)
 	}
 
 	uint8_t *cluptr = NULL;
-	uint8_t *regionptr = region;
 
-	if (!ValidateMagic(region, CLU_MAGIC, CLU_MAGIC_LEN)) {
+	if (!ValidateMagicF(fp, CLU_MAGIC, CLU_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
 	}
-
-	regionptr += CLU_MAGIC_LEN;
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
 		memset(clu->array[i], 0, sizeof(clu->array[i]));
 		cluptr = clu->array[i];
 
-		regionptr += 2; /* skip marker */
+		fseek(fp, 2L, SEEK_CUR); /* skip marker */
+		ReadUint8(fp, 1, cluptr); /* R */
 
-		*cluptr = *regionptr; /* red */
 		cluptr++;
+		fseek(fp, 1L, SEEK_CUR);
+		ReadUint8(fp, 1, cluptr); /* G */
 
-		regionptr += 2;
-		*cluptr = *regionptr; /* green */
 		cluptr++;
+		fseek(fp, 1L, SEEK_CUR);
+		ReadUint8(fp, 1, cluptr); /* B */
 
-		regionptr += 2;
-		*cluptr = *regionptr; /* blue */
-
-		regionptr += 2; /* go to next marker */
+		fseek(fp, 1L, SEEK_CUR); /* go to next marker */
 	}
 
-	*status = LUNAPURPURA_OK;
-	return clu;
-}
-
-
-/*
- * Creates a new CLU structure from the file at the given path. Reads the
- * entire file into memory.
- */
-CLU *
-CLU_NewFromFile(const char *path, LPStatus *status)
-{
-	FILE *f = fopen(path, "rb");
-
-	if (!f) {
-		*status = LUNAPURPURA_CANTOPENFILE;
-		return NULL;
-	}
-
-	fseek(f, 0L, SEEK_END);
-	long file_len = ftell(f);
-	rewind(f);
-
-	uint8_t *region = malloc(file_len);
-
-	if (!region) {
-		fclose(f);
-		*status = LUNAPURPURA_ERROR;
-		return NULL;
-	}
-
-	while (ftell(f) < file_len) {
-		size_t n = fread(region, 1, BUFSIZ, f);
-		region += n;
-	}
-	region -= file_len; /* "Rewind" the region */
-
-	LPStatus clu_new_status;
-	CLU *clu = CLU_NewFromData(region, &clu_new_status);
-
-	if (!clu) {
-		fclose(f);
-		free(region);
-		*status = clu_new_status;
-		return NULL;
-	}
-
-	fclose(f);
-	free(region);
 	*status = LUNAPURPURA_OK;
 	return clu;
 }

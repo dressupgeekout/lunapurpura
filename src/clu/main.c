@@ -13,9 +13,13 @@
 
 #include "clu.h"
 
+/* ********** */
+
 static void usage(void);
 
 static char *progname = NULL;
+
+/* ********** */
 
 static void
 usage(void)
@@ -23,6 +27,7 @@ usage(void)
 	LPLog("usage: %s file", progname);
 }
 
+/* ********** */
 
 int
 main(int argc, char *argv[])
@@ -56,17 +61,25 @@ main(int argc, char *argv[])
 	}
 
 	const char *clu_path = argv[0];
-	LPStatus status;
-	CLU *clu = CLU_NewFromFile(clu_path, &status);
 
-	if (!clu) {
-		CLU_Free(clu);
-		LPWarn(LP_SUBSYSTEM_CLU, "%s: %s", clu_path, LPStatusString(status));
-		if (status == LUNAPURPURA_CANTOPENFILE) {
-			LPWarn(LP_SUBSYSTEM_CLU, "%s", strerror(errno));
-		}
+	FILE *clu_fp = fopen(clu_path, "rb");
+
+	if (!clu_fp) {
+		LPWarn(LP_SUBSYSTEM_CLU, "%s: %s", clu_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
+
+	LPStatus status;
+	CLU *clu = CLU_NewFromFile(clu_fp, &status);
+
+	if (!clu) {
+		fclose(clu_fp);
+		CLU_Free(clu);
+		LPWarn(LP_SUBSYSTEM_CLU, "%s: %s", clu_path, LPStatusString(status));
+		return EXIT_FAILURE;
+	}
+
+	fclose(clu_fp);
 
 	for (int i = 0; i < CLU_NELEMENTS; i++) {
 		const uint8_t *color = CLU_ColorAtIndex(clu, i);
