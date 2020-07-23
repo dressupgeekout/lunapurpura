@@ -113,13 +113,18 @@ main(int argc, char *argv[])
 	fclose(clu_fp);
 
 	/* Read the XPK. */
-	XPK *xpk = XPK_NewFromFile(xpk_path, &status);
+	FILE *xpk_fp = fopen(xpk_path, "rb");
+
+	if (!xpk_fp) {
+		LPWarn(LP_SUBSYSTEM_XPK, "can't read XPK: %s: %s", xpk_path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	XPK *xpk = XPK_NewFromFile(xpk_fp, &status);
 
 	if (!xpk) {
+		fclose(xpk_fp);
 		LPWarn(LP_SUBSYSTEM_XPK, "%s: %s", xpk_path, LPStatusString(status));
-		if (status == LUNAPURPURA_CANTOPENFILE) {
-			LPWarn(LP_SUBSYSTEM_XPK, "%s", strerror(errno));
-		}
 		return EXIT_FAILURE;
 	}
 
