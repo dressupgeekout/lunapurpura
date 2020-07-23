@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+#
+# "Matrix" Reader
+#
+
+script = File.open(ARGV.shift, "r")
+
+current_record = {}
+
+line = "_"
+elements = [0,]
+
+until script.eof?
+  until line.empty? or elements.empty?
+    line = script.gets("\r")
+    if line
+      line.chomp!
+    else
+      break
+    end
+    elements = line.empty? ? [] : line.split(",")
+    if elements.any?
+      current_record[elements[0]] = elements[Range.new(1, elements.length-1)]
+    end
+  end
+  if current_record.any?
+    p current_record
+    puts
+  end
+  current_record = {}
+  line = "_"
+  elements = [0,]
+end
+
+script.close
