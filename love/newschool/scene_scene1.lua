@@ -1,25 +1,25 @@
 local function OnLoad()
-	ShowImage("GLOBAL/_advance_norm")
-	ShowImage("GLOBAL/_backtrack_norm")
-	ShowImage("GLOBAL/_id_norm")
-	ShowImage("GLOBAL/_hkeep_norm")
-	ShowImage("GLOBAL/_tv_norm")
+	ShowImage("GLOBAL/60010-advance_norm")
+	ShowImage("GLOBAL/60000-backtrack_norm")
+	ShowImage("GLOBAL/60030-id_norm")
+	ShowImage("GLOBAL/60060-hkeep_norm")
+	ShowImage("GLOBAL/60020-tv_norm")
 end
 
 local function MouseMoved(x, y, dx, dy, istouch)
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_hkeep_norm", "GLOBAL/_hkeep_hi")
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_backtrack_norm", "GLOBAL/_backtrack_hi")
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_advance_norm", "GLOBAL/_advance_hi")
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_tv_norm", "GLOBAL/_tv_hi")
-	InstallHighlightable(x, y, dx, dy, "GLOBAL/_id_norm", "GLOBAL/_id_hi")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/60060-hkeep_norm", "GLOBAL/60061-hkeep_hi")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/60000-backtrack_norm", "GLOBAL/60001-backtrack_hi")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/60010-advance_norm", "GLOBAL/60011-advance_hi")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/60020-tv_norm", "GLOBAL/60021-tv_hi")
+	InstallHighlightable(x, y, dx, dy, "GLOBAL/60030-id_norm", "GLOBAL/60031-id_hi")
 end
 
 local function MousePressed(x, y, button, istouch, npresses)
-	if IsOverWidget(x, y, "GLOBAL/_hkeep_norm") then
+	if IsOverWidget(x, y, "GLOBAL/60060-hkeep_norm") then
 		LoadScene("housekeeping2")
 	end
 
-	if IsOverWidget(x, y, "GLOBAL/_id_norm") then
+	if IsOverWidget(x, y, "GLOBAL/60030-id_norm") then
 		LoadScene("backpack")
 	end
 end
@@ -32,23 +32,23 @@ return {
 	MousePressed = MousePressed,
 
 	Template = {
-		CLU = "SCENE1/_Scene1.CLU",
+		CLU = "SCENE1/2000-Scene1.CLU",
 		XPKS = {
-			"GLOBAL/_advance_dim.XPK",
-			"GLOBAL/_advance_hi.XPK",
-			"GLOBAL/_advance_norm.XPK",
-			"GLOBAL/_backtrack_dim.XPK",
-			"GLOBAL/_backtrack_hi.XPK",
-			"GLOBAL/_backtrack_norm.XPK",
-			"GLOBAL/_camera1.XPK",
-			"GLOBAL/_camera2.XPK",
-			"GLOBAL/_id_hi.XPK",
-			"GLOBAL/_id_norm.XPK",
-			"GLOBAL/_hkeep_dim.XPK",
-			"GLOBAL/_hkeep_hi.XPK",
-			"GLOBAL/_hkeep_norm.XPK",
-			"GLOBAL/_tv_hi.XPK",
-			"GLOBAL/_tv_norm.XPK",
+			"GLOBAL/60012-advance_dim.XPK",
+			"GLOBAL/60011-advance_hi.XPK",
+			"GLOBAL/60010-advance_norm.XPK",
+			"GLOBAL/60002-backtrack_dim.XPK",
+			"GLOBAL/60001-backtrack_hi.XPK",
+			"GLOBAL/60000-backtrack_norm.XPK",
+			"GLOBAL/60050-camera1.XPK",
+			"GLOBAL/60051-camera2.XPK",
+			"GLOBAL/60031-id_hi.XPK",
+			"GLOBAL/60030-id_norm.XPK",
+			"GLOBAL/60062-hkeep_dim.XPK",
+			"GLOBAL/60061-hkeep_hi.XPK",
+			"GLOBAL/60060-hkeep_norm.XPK",
+			"GLOBAL/60021-tv_hi.XPK",
+			"GLOBAL/60020-tv_norm.XPK",
 		},
 	},
 }

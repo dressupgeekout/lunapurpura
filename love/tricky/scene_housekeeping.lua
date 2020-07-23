@@ -1,21 +1,21 @@
 local function OnLoad()
-	ShowImage("Global/new_adv_ylw")
-	ShowImage("Global/sel_adv_ylw")
-	ShowImage("Global/save_ylw")
-	ShowImage("Global/end_ylw")
+	ShowImage("Global/63604-new_adv_ylw")
+	ShowImage("Global/63605-sel_adv_ylw")
+	ShowImage("Global/63606-save_ylw")
+	ShowImage("Global/63607-end_ylw")
 
-	--ShowImage("Global/SOFT_LOUD_VO1") -- XXX use-after-free? 
-	ShowImage("Global/SOFT_LOUD_VO2")
-	ShowImage("Global/SOFT_LOUD_VO3")
-	ShowImage("Global/SOFT_LOUD_VO4")
-	ShowImage("Global/SOFT_LOUD_VO5")
+	ShowImage("Global/63710-SOFT_LOUD_VO1")
+	ShowImage("Global/63711-SOFT_LOUD_VO2")
+	ShowImage("Global/63712-SOFT_LOUD_VO3")
+	ShowImage("Global/63713-SOFT_LOUD_VO4")
+	ShowImage("Global/63714-SOFT_LOUD_VO5")
 end
 
 local function MouseMoved(x, y, dx, dy, istouch)
-	InstallHighlightable(x, y, dx, dy, "Global/new_adv_ylw", "Global/new_advntr_pink")
-	InstallHighlightable(x, y, dx, dy, "Global/sel_adv_ylw", "Global/select_advntr_p")
-	InstallHighlightable(x, y, dx, dy, "Global/save_ylw", "Global/save_my_place_p")
-	InstallHighlightable(x, y, dx, dy, "Global/end_ylw", "Global/end_pink")
+	InstallHighlightable(x, y, dx, dy, "Global/63604-new_adv_ylw", "Global/63600-new_advntr_pink")
+	InstallHighlightable(x, y, dx, dy, "Global/63605-sel_adv_ylw", "Global/63601-select_advntr_p")
+	InstallHighlightable(x, y, dx, dy, "Global/63606-save_ylw", "Global/63602-save_my_place_p")
+	InstallHighlightable(x, y, dx, dy, "Global/63607-end_ylw", "Global/63603-end_pink")
 end
 
 local function MousePressed(x, y, button, istouch, npresses)
@@ -27,21 +27,21 @@ return {
 	MousePressed = MousePressed,
 
 	Template = {
-		CLU = "Global/!housekeeping.CLU",
+		CLU = "Global/63000-!housekeeping.CLU",
 		XPKS = {
-			--"Global/SOFT_LOUD_VO1.XPK", -- XXX use-after-free?
-			"Global/SOFT_LOUD_VO2.XPK",
-			"Global/SOFT_LOUD_VO3.XPK",
-			"Global/SOFT_LOUD_VO4.XPK",
-			"Global/SOFT_LOUD_VO5.XPK",
-			"Global/end_pink.XPK",
-			"Global/end_ylw.XPK",
-			"Global/new_adv_ylw.XPK",
-			"Global/new_advntr_pink.XPK",
-			"Global/save_my_place_p.XPK",
-			"Global/save_ylw.XPK",
-			"Global/sel_adv_ylw.XPK",
-			"Global/select_advntr_p.XPK",
+			"Global/63710-SOFT_LOUD_VO1.XPK",
+			"Global/63711-SOFT_LOUD_VO2.XPK",
+			"Global/63712-SOFT_LOUD_VO3.XPK",
+			"Global/63713-SOFT_LOUD_VO4.XPK",
+			"Global/63714-SOFT_LOUD_VO5.XPK",
+			"Global/63603-end_pink.XPK",
+			"Global/63607-end_ylw.XPK",
+			"Global/63604-new_adv_ylw.XPK",
+			"Global/63600-new_advntr_pink.XPK",
+			"Global/63602-save_my_place_p.XPK",
+			"Global/63606-save_ylw.XPK",
+			"Global/63605-sel_adv_ylw.XPK",
+			"Global/63601-select_advntr_p.XPK",
 		},
 	},
 }
