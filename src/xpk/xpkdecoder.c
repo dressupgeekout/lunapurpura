@@ -18,9 +18,27 @@
 
 #include "xpkdecoder.h"
 
+static struct RepeatMarker *new_repeat_marker(void);
 static void xpk_decoder_init(XPKDecoder *decoder);
+static void push_repeat_marker(XPKDecoder *decoder, unsigned int reps, long loc);
+static void pop_repeat_marker(XPKDecoder *decoder);
+static struct RepeatMarker *current_repeat_marker(XPKDecoder *decoder);
 
 /* ********** */
+
+/*
+ * RepeatMarkers are allocated with push_repeat_marker() and are deallocated
+ * with pop_repeat_marker().
+ */
+static struct RepeatMarker *
+new_repeat_marker(void)
+{
+	struct RepeatMarker *marker = calloc(1, sizeof(struct RepeatMarker));
+	marker->reps = 0;
+	marker->loc = 0L;
+	return marker;
+}
+
 
 static void
 xpk_decoder_init(XPKDecoder *d)
@@ -28,13 +46,54 @@ xpk_decoder_init(XPKDecoder *d)
 	d->n_reps = 0;
 	d->direct_counter = 0;
 	d->next_holder = 0;
-	d->repeat = 0;
-	d->repeat_loc = 0L;
 	d->line_repeat = 0;
 	d->line_repeat_loc = 0L;
 	d->cur_x = 0;
 	d->cur_y = 0;
+
+	for (int i = 0; i < XPK_MAX_REPEAT_MARKERS; i++) {
+		d->repeat_markers[i] = NULL;
+	}
+
+	d->repeat_marker_top = -1;
 }
+
+
+static void
+push_repeat_marker(XPKDecoder *d, unsigned int reps, long loc)
+{
+#ifdef LUNAPURPURA_XPK_TRACE
+	LPWarn(LP_SUBSYSTEM_XPK, "pushing new repeat marker");
+#endif
+	d->repeat_marker_top++;
+	if (d->repeat_marker_top >= XPK_MAX_REPEAT_MARKERS) {
+		LPWarn(LP_SUBSYSTEM_XPK, "%s: STACK OVERFLOW!!", __func__);
+		d->repeat_marker_top--;
+	} else {
+		d->repeat_markers[d->repeat_marker_top] = new_repeat_marker();
+		d->repeat_markers[d->repeat_marker_top]->reps = reps;
+		d->repeat_markers[d->repeat_marker_top]->loc = loc;
+	}
+}
+
+
+static void
+pop_repeat_marker(XPKDecoder *d)
+{
+#ifdef LUNAPURPURA_XPK_TRACE
+	LPWarn(LP_SUBSYSTEM_XPK, "popping repeat marker");
+#endif
+	free(d->repeat_markers[d->repeat_marker_top]);
+	d->repeat_marker_top--;
+}
+
+
+static struct RepeatMarker *
+current_repeat_marker(XPKDecoder *d)
+{
+	return d->repeat_markers[d->repeat_marker_top];
+}
+
 
 /* ********** */
 
@@ -129,27 +188,33 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							break;
 						case XPKINST_REPEAT_END:
 							{
-								if (d->repeat > 0) {
-									d->repeat--;
+								struct RepeatMarker *marker = current_repeat_marker(d);
+								if (marker->reps > 0) {
+											 marker->reps--;
 								}
-								if (d->repeat > 0) {
-									fseek(entry->xpk->file, d->repeat_loc, SEEK_SET);
+								if (marker->reps > 0) {
+									fseek(entry->xpk->file, marker->loc, SEEK_SET);
 #ifdef LUNAPURPURA_XPK_TRACE
-									LPWarn(LP_SUBSYSTEM_XPK, "REPEAT_END (%d remaining)", d->repeat);
+									LPWarn(LP_SUBSYSTEM_XPK, "REPEAT_END (%d remaining)", marker->reps);
 #endif
 								} else {
-									d->repeat_loc = 0L;
+									pop_repeat_marker(d);
 								}
 							}
 							break;
 						default:
-							d->repeat = argument;
-							d->repeat_loc = ftell(entry->xpk->file);
+							push_repeat_marker(d, argument, ftell(entry->xpk->file));
 #ifdef LUNAPURPURA_XPK_TRACE
-						LPWarn(LP_SUBSYSTEM_XPK, "REPEAT %d", argument);
+							LPWarn(LP_SUBSYSTEM_XPK, "REPEAT %d", argument);
 #endif
 						}
 					}
+					break;
+				case XPKINST_BIGREPEAT:
+					push_repeat_marker(d, 16+argument, ftell(entry->xpk->file));
+#ifdef LUNAPURPURA_XPK_TRACE
+					LPWarn(LP_SUBSYSTEM_XPK, "BIGREPEAT %d", 16+argument);
+#endif
 					break;
 				case XPKINST_XSKIP:
 					if (argument) {
@@ -272,11 +337,19 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 #endif
 					break;
 				case XPKINST_DIRECTNL:
-					d->direct_counter = argument;
-					NEWLINE(d);
+					if (argument) {
+						d->direct_counter = argument;
 #ifdef LUNAPURPURA_XPK_TRACE
-					LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", argument);
+						LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", argument);
 #endif
+					} else {
+						ReadUint16(entry->xpk->file, 1, &d->next_holder);
+						d->direct_counter = d->next_holder;
+#ifdef LUNAPURPURA_XPK_TRACE
+						LPWarn(LP_SUBSYSTEM_XPK, "DIRECTNL %d", d->next_holder);
+#endif
+					}
+					NEWLINE(d);
 					break;
 				case XPKINST_BIGDIRECTNL:
 					d->direct_counter = (16 + argument);
