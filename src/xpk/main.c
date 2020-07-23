@@ -96,12 +96,21 @@ main(int argc, char *argv[])
 	LPStatus status;
 
 	/* Read the CLU. */
-	CLU *clu = CLU_NewFromFile(clu_path, &status);
+	FILE *clu_fp = fopen(clu_path, "rb");
+
+	if (!clu_fp) {
+		LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	CLU *clu = CLU_NewFromFile(clu_fp, &status);
 
 	if (!clu) {
 		LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, LPStatusString(status));
 		return EXIT_FAILURE;
 	}
+
+	fclose(clu_fp);
 
 	/* Read the XPK. */
 	XPK *xpk = XPK_NewFromFile(xpk_path, &status);
