@@ -17,6 +17,7 @@ enum XPKDecoderInstruction {
 	XPKINST_REPEAT = 0x0, /* Opcode 0 instead of argument 0 ... */
 	XPKINST_RLENEXT = 0x00, /* ... BUT, opcode 0 AND argument 0 is a special case */
 	XPKINST_REPEAT_END = 0x01,
+	XPKINST_BIGREPEAT = 0x1,
 	XPKINST_XSKIP = 0x2,
 	XPKINST_BIGXSKIP = 0x3,
 	XPKINST_RLE = 0x4,
@@ -35,16 +36,23 @@ enum XPKDecoderInstruction {
 };
 typedef enum XPKDecoderInstruction XPKDecoderInstruction;
 
+struct RepeatMarker {
+	unsigned int reps;
+	long loc;
+};
+
+#define XPK_MAX_REPEAT_MARKERS 4
+
 struct XPKDecoder {
 	unsigned int n_reps;
 	unsigned int direct_counter;
 	uint16_t next_holder;
-	unsigned int repeat;
-	long repeat_loc;
 	unsigned int line_repeat;
 	long line_repeat_loc;
 	size_t cur_x;
 	size_t cur_y;
+	struct RepeatMarker *repeat_markers[XPK_MAX_REPEAT_MARKERS];
+	int repeat_marker_top;
 };
 typedef struct XPKDecoder XPKDecoder;
 

@@ -7,6 +7,7 @@ add_subdirectory(mmfw)
 add_subdirectory(prx)
 add_subdirectory(riff)
 add_subdirectory(smf)
+add_subdirectory(xmv)
 add_subdirectory(xpk)
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
