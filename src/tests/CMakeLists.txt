@@ -1,12 +1,23 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_executable(clu_test clu_test.c)
+#add_executable(clu_test clu_test.c)
+#
+#target_include_directories(clu_test PRIVATE
+#  ${CMAKE_CURRENT_LIST_DIR}
+#  ${CMAKE_CURRENT_LIST_DIR}/../clu
+#  ${CMAKE_CURRENT_LIST_DIR}/../prx
+#  ${CMAKE_CURRENT_LIST_DIR}/../lputil
+#)
+#
+#target_link_libraries(clu_test lpclu lpprx lputil)
 
-target_include_directories(clu_test PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}
-  ${CMAKE_CURRENT_LIST_DIR}/../clu
-  ${CMAKE_CURRENT_LIST_DIR}/../prx
+########## ########## ##########
+
+add_executable(matrix_test matrix_test.c)
+
+target_include_directories(matrix_test PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
+  ${CMAKE_CURRENT_LIST_DIR}/../matrix
 )
 
-target_link_libraries(clu_test lpclu lpprx lputil)
+target_link_libraries(matrix_test lpmatrix lputil)
