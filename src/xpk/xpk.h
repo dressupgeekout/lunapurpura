@@ -55,7 +55,7 @@ struct XPK {
 	XPKEntry **entries;
 };
 
-XPK *XPK_NewFromFile(const char *path, LPStatus *status);
+XPK *XPK_NewFromFile(FILE *fp, LPStatus *status);
 void XPK_Free(XPK *xpk);
 XPKEntry *XPK_EntryAtIndex(const XPK *xpk, const int index);
 void XPK_AttachCLU(XPK *xpk, CLU *clu);

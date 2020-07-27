@@ -29,7 +29,7 @@ main(int argc, char *argv[])
 	CLU *clu = NULL;
 
 	LPStatus status;
-	/* XXX PRX only */
+	/* XXX PRX only for now */
 	PresageArchive *archive = PresageArchive_NewFromFiles(path, NULL, &status);
 
 	if (!archive) {
@@ -43,11 +43,13 @@ main(int argc, char *argv[])
 	member = PresageArchive_MemberWithResourceId(archive, "CLU", rid);
 
 	if (!member) {
-		LPWarn(MSGPREFIX, "couldn't find PRX member %ld", rid);
+		LPWarn(MSGPREFIX, "couldn't find CLU-type PRX member with RID %ld", rid);
 		goto fail;
 	}
 
-	clu = CLU_NewFromData(member->data, &status);
+	uint32_t offset = PresageArchive_AbsoluteOffsetForMember(archive, member);
+	fseek(archive->archive.prx->fp, (long)offset, SEEK_SET);
+	clu = CLU_NewFromFile(archive->archive.prx->fp, &status);
 
 	if (!clu) {
 		LPWarn(MSGPREFIX, "couldn't create CLU: %s", LPStatusString(status));

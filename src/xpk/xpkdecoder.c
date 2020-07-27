@@ -20,7 +20,7 @@
 
 static struct RepeatMarker *new_repeat_marker(void);
 static void xpk_decoder_init(XPKDecoder *decoder);
-static void push_repeat_marker(XPKDecoder *decoder, unsigned int reps, long loc);
+static void push_repeat_marker(XPKDecoder *decoder, bool with_newline, unsigned int reps, long loc);
 static void pop_repeat_marker(XPKDecoder *decoder);
 static struct RepeatMarker *current_repeat_marker(XPKDecoder *decoder);
 
@@ -34,6 +34,7 @@ static struct RepeatMarker *
 new_repeat_marker(void)
 {
 	struct RepeatMarker *marker = calloc(1, sizeof(struct RepeatMarker));
+	marker->newline = false;
 	marker->reps = 0;
 	marker->loc = 0L;
 	return marker;
@@ -46,8 +47,6 @@ xpk_decoder_init(XPKDecoder *d)
 	d->n_reps = 0;
 	d->direct_counter = 0;
 	d->next_holder = 0;
-	d->line_repeat = 0;
-	d->line_repeat_loc = 0L;
 	d->cur_x = 0;
 	d->cur_y = 0;
 
@@ -60,7 +59,7 @@ xpk_decoder_init(XPKDecoder *d)
 
 
 static void
-push_repeat_marker(XPKDecoder *d, unsigned int reps, long loc)
+push_repeat_marker(XPKDecoder *d, bool with_newline, unsigned int reps, long loc)
 {
 #ifdef LUNAPURPURA_XPK_TRACE
 	LPWarn(LP_SUBSYSTEM_XPK, "pushing new repeat marker");
@@ -71,6 +70,7 @@ push_repeat_marker(XPKDecoder *d, unsigned int reps, long loc)
 		d->repeat_marker_top--;
 	} else {
 		d->repeat_markers[d->repeat_marker_top] = new_repeat_marker();
+		d->repeat_markers[d->repeat_marker_top]->newline = with_newline;
 		d->repeat_markers[d->repeat_marker_top]->reps = reps;
 		d->repeat_markers[d->repeat_marker_top]->loc = loc;
 	}
@@ -203,7 +203,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 							}
 							break;
 						default:
-							push_repeat_marker(d, argument, ftell(entry->xpk->file));
+							push_repeat_marker(d, false, argument, ftell(entry->xpk->file));
 #ifdef LUNAPURPURA_XPK_TRACE
 							LPWarn(LP_SUBSYSTEM_XPK, "REPEAT %d", argument);
 #endif
@@ -211,7 +211,7 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 					}
 					break;
 				case XPKINST_BIGREPEAT:
-					push_repeat_marker(d, 16+argument, ftell(entry->xpk->file));
+					push_repeat_marker(d, false, 16+argument, ftell(entry->xpk->file));
 #ifdef LUNAPURPURA_XPK_TRACE
 					LPWarn(LP_SUBSYSTEM_XPK, "BIGREPEAT %d", 16+argument);
 #endif
@@ -276,24 +276,24 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 						switch (byte) {
 						case XPKINST_LINEREPEAT_END:
 							{
-								if (d->line_repeat > 0) {
-									d->line_repeat--;
+								struct RepeatMarker *marker = current_repeat_marker(d);
+								if (marker->reps > 0) {
+									marker->reps--;
 								}
-								if (d->line_repeat > 0) {
-									fseek(entry->xpk->file, d->line_repeat_loc, SEEK_SET);
+								if (marker->reps > 0) {
+									fseek(entry->xpk->file, marker->loc, SEEK_SET);
 								} else {
-									d->line_repeat_loc = 0L;
+									pop_repeat_marker(d);
 								}
 								NEWLINE(d);
 #ifdef LUNAPURPURA_XPK_TRACE
-								LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT_END (%d remaining)", d->line_repeat);
+								LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT_END (%d remaining)", marker->reps);
 #endif
 								break;
 							}
 						default:
+							push_repeat_marker(d, true, argument, ftell(entry->xpk->file));
 							NEWLINE(d);
-							d->line_repeat = argument;
-							d->line_repeat_loc = ftell(entry->xpk->file);
 #ifdef LUNAPURPURA_XPK_TRACE
 							LPWarn(LP_SUBSYSTEM_XPK, "LINEREPEAT %d", argument);
 #endif

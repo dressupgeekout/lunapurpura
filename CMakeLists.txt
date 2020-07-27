@@ -7,6 +7,7 @@ set(LUNAPURPURA_BUILD_LUA_BINDINGS OFF CACHE BOOL "Build the Lua/LuaJIT bindings
 set(LUNAPURPURA_BUILD_MRUBY_BINDINGS OFF CACHE BOOL "Build the mruby bindings")
 set(LUNAPURPURA_BUILD_TESTS ON CACHE BOOL "Build the test applications")
 set(LUNAPURPURA_PNG_SUPPORT ON CACHE BOOL "Enable conversion to PNG")
+set(LUNAPURPURA_SDL_SUPPORT ON CACHE BOOL "Enable apps which require SDL2")
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
   message(STATUS "Lua bindings enabled")
@@ -27,6 +28,12 @@ endif()
 if(${LUNAPURPURA_PNG_SUPPORT})
   message(STATUS "PNG support enabled")
   find_package(PNG REQUIRED)
+endif()
+
+include(FindPkgConfig)
+if(${LUNAPURPURA_SDL_SUPPORT})
+  message(STATUS "SDL support enabled")
+  pkg_check_modules(SDL2 REQUIRED sdl2)
 endif()
 
 include(CheckFunctionExists)

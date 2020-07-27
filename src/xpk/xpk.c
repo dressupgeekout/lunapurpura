@@ -14,7 +14,7 @@
 #include "xpk.h"
 #include "xpkdecoder.h"
 
-uint8_t XPK_MAGIC[4] = {165, 126, 112, 1};
+uint8_t XPK_MAGIC[XPK_MAGIC_LEN] = {165, 126, 112, 1};
 
 /* ********** */
 
@@ -58,16 +58,14 @@ XPKEntry_Decode(XPKEntry *entry, LPStatus *status)
 
 /* ********** */
 
+/*
+ * The caller is responsible for ensuring the FILE* has advanced to the
+ * correct place. The caller MUST NOT close the FILE* directly. Instead, use
+ * XPK_Free() when you're done -- this will close the FILE* for you.
+ */
 XPK *
-XPK_NewFromFile(const char *path, LPStatus *status)
+XPK_NewFromFile(FILE *f, LPStatus *status)
 {
-	FILE *f = fopen(path, "rb");
-
-	if (!f) {
-		*status = LUNAPURPURA_CANTOPENFILE;
-		return NULL;
-	}
-
 	if (!ValidateMagicF(f, XPK_MAGIC, XPK_MAGIC_LEN)) {
 		*status = LUNAPURPURA_BADMAGIC;
 		return NULL;
