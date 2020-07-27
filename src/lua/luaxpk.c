@@ -2,6 +2,10 @@
  * Lua bindings to Luna Purpura's XPK library
  */
 
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -39,14 +43,24 @@ luaxpk_NewFromFile(lua_State *L)
 	luaL_checkudata(L, 2, "T_CLU"); /* XXX DRY plz */
 	CLU **clu = lua_touserdata(L, 2);
 	lua_pop(L, 2);
+
 	XPK **xpk = lua_newuserdata(L, sizeof(xpk));
 	luaL_getmetatable(L, XPK_TYPE_NAME);
 	lua_setmetatable(L, -2);
+
+	FILE *fp = fopen(path, "rb");
+
+	if (!fp) {
+		return luaL_error(L, "%s: %s", path, strerror(errno));
+	}
+
 	LPStatus status;
-	*xpk = XPK_NewFromFile(path, &status);
+	*xpk = XPK_NewFromFile(fp, &status);
+
 	if (status != LUNAPURPURA_OK) {
 		return luaL_error(L, "%s", LPStatusString(status));
 	}
+
 	XPK_AttachCLU(*xpk, *clu);
 	return 1;
 }

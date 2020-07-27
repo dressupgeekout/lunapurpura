@@ -7,6 +7,8 @@
 #ifndef LUNAPURPURA_XPKDECODER_H
 #define LUNAPURPURA_XPKDECODER_H
 
+#include <stdbool.h>
+
 #include <lputil.h>
 
 #include <clu.h>
@@ -37,6 +39,7 @@ enum XPKDecoderInstruction {
 typedef enum XPKDecoderInstruction XPKDecoderInstruction;
 
 struct RepeatMarker {
+	bool newline;
 	unsigned int reps;
 	long loc;
 };
@@ -47,8 +50,6 @@ struct XPKDecoder {
 	unsigned int n_reps;
 	unsigned int direct_counter;
 	uint16_t next_holder;
-	unsigned int line_repeat;
-	long line_repeat_loc;
 	size_t cur_x;
 	size_t cur_y;
 	struct RepeatMarker *repeat_markers[XPK_MAX_REPEAT_MARKERS];
