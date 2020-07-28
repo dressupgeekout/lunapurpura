@@ -6,12 +6,17 @@ set(LUNAPURPURA_XPK_TRACE OFF CACHE BOOL "Add tracing output while decoding XPKs
 
 ########## ########## ##########
 
-add_library(lpxpk STATIC
+list(APPEND lpxpk_SOURCES
   xpk.c
-  xpk.h
   xpkdecoder.c
+)
+
+list(APPEND lpxpk_HEADERS
+  xpk.h
   xpkdecoder.h
 )
+
+add_library(lpxpk STATIC ${lpxpk_SOURCES} ${lpxpk_HEADERS})
 
 if(${LUNAPURPURA_XPK_HACK})
   message(STATUS "XPK hack enabled")
@@ -39,9 +44,11 @@ endif()
 
 ########## ########## ##########
 
-add_executable(xpk
+list(APPEND xpk_SOURCES
   main.c
 )
+
+add_executable(xpk ${xpk_SOURCES})
 
 target_include_directories(xpk PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
@@ -55,3 +62,16 @@ if(${LUNAPURPURA_PNG_SUPPORT})
   target_compile_options(xpk PUBLIC "-DLUNAPURPURA_PNG_SUPPORT" "${PNG_DEFINTIONS}")
   target_link_libraries(xpk "${PNG_LIBRARIES}")
 endif()
+
+########## ########## ##########
+
+install(
+  TARGETS lpxpk xpk
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+  FILES ${lpxpk_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lunapurpura
+)

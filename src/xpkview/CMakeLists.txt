@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_executable(xpkview
+list(APPEND xpkview_SOURCES
   xpkview.c
 )
+
+add_executable(xpkview ${xpkview_SOURCES})
 
 target_include_directories(xpkview PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../xpk
@@ -31,3 +33,10 @@ else()
   target_include_directories(xpkview SYSTEM PUBLIC ${SDL2_INCLUDE_DIRS})
   target_link_libraries(xpkview ${SDL2_LDFLAGS})
 endif()
+
+########## ########## ##########
+
+install(
+  TARGETS xpkview
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

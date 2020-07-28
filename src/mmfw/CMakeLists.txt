@@ -1,15 +1,20 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_library(lpmmfw STATIC
+list(APPEND lpmmfw_SOURCES
   mmfw.c
-  mmfw.h
   mmfwfilm.c
-  mmfwfilm.h
   mmfwpicture.c
-  mmfwpicture.h
   mmfwsound.c
+)
+
+list(APPEND lpmmfw_HEADERS
+  mmfw.h
+  mmfwfilm.h
+  mmfwpicture.h
   mmfwsound.h
 )
+
+add_library(lpmmfw STATIC ${lpmmfw_SOURCES} ${lpmmfw_HEADERS})
 
 target_include_directories(lpmmfw PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
@@ -20,9 +25,11 @@ target_link_libraries(lpmmfw lputil)
 
 ########## ########## ##########
 
-add_executable(mmfw
+list(APPEND mmfw_SOURCES
   main.c
 )
+
+add_executable(mmfw ${mmfw_SOURCES})
 
 target_include_directories(mmfw PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
@@ -30,3 +37,16 @@ target_include_directories(mmfw PRIVATE
 )
 
 target_link_libraries(mmfw lpmmfw lputil)
+
+########## ########## ##########
+
+install(
+  TARGETS lpmmfw mmfw
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+  FILES ${lpmmfw_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lunapurpura
+)
