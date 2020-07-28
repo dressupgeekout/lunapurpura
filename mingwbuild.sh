@@ -82,9 +82,13 @@ cp -Rv ${sdl2_dir}/ ${installroot}
 
 
 # === Luna Purpura ===
+rm -r ${lunapurpura_builddir}
 mkdir -p ${lunapurpura_builddir}
 
 cd ${lunapurpura_builddir}
+
+#sdl2_cflags="$(${installroot}/bin/sdl2-config --prefix=${installroot} --cflags)"
+#sdl2_libs="$(${installroot}/bin/sdl2-config --prefix=${installroot} --libs)"
 
 cmake ${lunapurpura_srcdir} \
   -DCMAKE_BUILD_TYPE=Debug \
@@ -99,9 +103,8 @@ cmake ${lunapurpura_srcdir} \
   -DLUNAPURPURA_PNG_SUPPORT=OFF \
   -DLUNAPURPURA_SDL_SUPPORT=ON \
   -DLUNAPURPURA_PROVIDED_SDL=ON \
-  -DLUNAPURPURA_SDL2_INCLUDE_DIRS=${installroot}/include \
-  -DLUNAPURPURA_SDL2_LDFLAGS=-L${installroot}/bin
+  -DSDL2_CONFIG="${installroot}/bin/sdl2-config" \
+  -DSDL2_CONFIG_PREFIX="${installroot}"
 
-# ^^ XXX should use sdl2-config script instead
-
-cmake --build .
+#cmake --build .
+make VERBOSE=1
