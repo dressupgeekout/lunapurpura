@@ -106,5 +106,5 @@ cmake ${lunapurpura_srcdir} \
   -DSDL2_CONFIG="${installroot}/bin/sdl2-config" \
   -DSDL2_CONFIG_PREFIX="${installroot}"
 
-#cmake --build .
-make VERBOSE=1
+cmake --build .
+cmake --install .
