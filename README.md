@@ -3,6 +3,8 @@
 _**This software is totally a work in progress and very few things are
 actually functional.  It's still in a research phase.**_
 
+![](https://lunapurpura.s3-us-west-1.amazonaws.com/rockett-lpxpkviewer.png)
+
 **Luna Purpura** is a portable reimplementation of [Purple Moon][]'s classic
 computer games from the 1990s:
 
