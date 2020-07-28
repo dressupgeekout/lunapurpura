@@ -17,10 +17,25 @@
 
 /* ********** */
 
+enum XPKToolAction {
+	XPK_TOOL_ACTION_NONE,
+	XPK_TOOL_ACTION_LIST,
+	XPK_TOOL_ACTION_DECODE_INDIV,
+	XPK_TOOL_ACTION_DECODE_TILED,
+};
+
 static void usage(void);
+static bool xpk_list(const XPK *xpk);
+static bool xpk_decode_indiv(const XPK *xpk);
+static bool xpk_decode_tiled(const XPK *xpk);
 
 static char *progname = NULL;
-static bool want_tiled_mode = false;
+static enum XPKToolAction action = XPK_TOOL_ACTION_NONE;
+static char *clu_path = NULL;
+static char *out_path = NULL;
+static char *xpk_path = NULL;
+static bool want_png = false;
+static uint8_t *rgba = NULL;
 
 /* ********** */
 
@@ -32,7 +47,16 @@ usage(void)
 #else
 	const char *png_support = "";
 #endif
-	LPLog(LP_SUBSYSTEM_XPK, "usage: %s [-h] %s [-t] -c clu -o output file", progname, png_support);
+	LPLog(
+		LP_SUBSYSTEM_XPK,
+		"usage: %s [options ...] [file]\n"
+			"\t%s -l <file>                          List frames\n"
+			"\t%s -x %s -c <clu> -o <output> <file>  Extract all frames\n"
+			"\t%s -t %s -c <clu> -o <output> <file>  Extract single \"tiled mode\" frame\n"
+			"\t%s -h                                 Show this help message",
+		progname, progname, progname, png_support, progname, png_support,
+		progname
+	);
 }
 
 /* ********** */
@@ -47,14 +71,11 @@ main(int argc, char *argv[])
 #endif
 
 	int ch;
-	char *clu_path = NULL;
-	char *out_path = NULL;
 
 #ifdef LUNAPURPURA_PNG_SUPPORT
-	bool want_png = false;
-	const char *opts =  "c:o:pth";
+	const char *opts =  "c:hlo:ptx";
 #else
-	const char *opts =  "c:o:th";
+	const char *opts =  "c:hlo:tx";
 #endif
 
 	while ((ch = LPGetopt(argc, argv, opts)) != -1) {
@@ -66,6 +87,9 @@ main(int argc, char *argv[])
 			usage();
 			return EXIT_SUCCESS;
 			break;
+		case 'l':
+			action = XPK_TOOL_ACTION_LIST;
+			break;
 		case 'o':
 			out_path = optarg;
 			break;
@@ -75,7 +99,10 @@ main(int argc, char *argv[])
 			break;
 #endif
 		case 't':
-			want_tiled_mode = true;
+			action = XPK_TOOL_ACTION_DECODE_TILED;
+			break;
+		case 'x':
+			action = XPK_TOOL_ACTION_DECODE_INDIV;
 			break;
 		case '?': /* FALLTHROUGH */
 		default:
@@ -86,116 +113,182 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (!clu_path || argc < 1) {
+	if (action == XPK_TOOL_ACTION_NONE) {
 		usage();
 		return EXIT_FAILURE;
 	}
 
-	const char *xpk_path = argv[0];
+	if (argc < 1) {
+		usage();
+		return EXIT_FAILURE;
+	}
 
+#ifdef LUNAPURPURA_PNG_SUPPORT
+	/* XXX Just for now. */
+	if (action == XPK_TOOL_ACTION_DECODE_TILED && want_png) {
+		LPWarn(LP_SUBSYSTEM_XPK, "sorry, can't decode to PNG in tiled mode for now");
+		return EXIT_FAILURE;
+	}
+#endif
+
+	xpk_path = argv[0];
 	LPStatus status;
 
-	/* Read the CLU. */
-	CLU *clu = CLU_NewFromFile(clu_path, &status);
+	/* Obtain the XPK structure in any case. */
+	FILE *xpk_fp = fopen(xpk_path, "rb");
 
-	if (!clu) {
-		LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, LPStatusString(status));
+	if (!xpk_fp) {
+		LPWarn(LP_SUBSYSTEM_XPK, "can't read XPK: %s: %s", xpk_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	/* Read the XPK. */
-	XPK *xpk = XPK_NewFromFile(xpk_path, &status);
+	XPK *xpk = XPK_NewFromFile(xpk_fp, &status);
 
 	if (!xpk) {
+		fclose(xpk_fp);
 		LPWarn(LP_SUBSYSTEM_XPK, "%s: %s", xpk_path, LPStatusString(status));
-		if (status == LUNAPURPURA_CANTOPENFILE) {
-			LPWarn(LP_SUBSYSTEM_XPK, "%s", strerror(errno));
-		}
 		return EXIT_FAILURE;
 	}
 
-	/* OK let's go! */
-	XPK_AttachCLU(xpk, clu);
-
-	printf("%d entry(ies):\n", xpk->n_entries);
-
-	uint8_t *rgba = NULL;
-
-	if (want_tiled_mode) {
-		rgba = XPK_DecodeTiledMode(xpk, &status);
-
-		if (status != LUNAPURPURA_OK) {
-			LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode in tiled mode: %s", LPStatusString(status));
-			goto fail;
+	/* Obtain the CLU structure, if we need it, and attach it to the XPK. */
+	if (action == XPK_TOOL_ACTION_DECODE_INDIV || action == XPK_TOOL_ACTION_DECODE_TILED) {
+		if (!clu_path || !out_path) {
+			usage();
+			return EXIT_FAILURE;
 		}
 
-		FILE *out_f = fopen(out_path, "wb");
-		fwrite(rgba, 4, 640*480, out_f);
-		fclose(out_f);
-	} else {
-		for (int i = 0; i < xpk->n_entries; i++) {
-			printf("\t");
-			XPKEntry_Pretty(XPK_EntryAtIndex(xpk, i));
+		FILE *clu_fp = fopen(clu_path, "rb");
+
+		if (!clu_fp) {
+			LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, strerror(errno));
+			return EXIT_FAILURE;
 		}
 
-		for (int i = 0; i < xpk->n_entries; i++) {
-			XPKEntry *entry = XPK_EntryAtIndex(xpk, i);
+		CLU *clu = CLU_NewFromFile(clu_fp, &status);
 
-			rgba = XPKEntry_Decode(entry, &status);
-
-			if (status != LUNAPURPURA_OK) {
-				LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode: %s", LPStatusString(status));
-				goto fail;
-			}
-
-			if (!(entry->width && entry->height)) {
-				LPWarn(LP_SUBSYSTEM_XPK, "skipping entry %d with zero width and/or height", i);
-				continue;
-			}
-
-			char real_out_path[512];
-
-			if (out_path) {
-				if (xpk->n_entries > 1) {
-					/*
-					 * The number of XPK entries is a uint16, which means the largest
-					 * possible frame number is 65535, which is 5 decimal digits long.
-					 */
-					snprintf(real_out_path, sizeof(real_out_path), "%05d-%s", i, out_path);
-				} else {
-					snprintf(real_out_path, sizeof(real_out_path), "%s", out_path);
-				}
-				LPWarn(LP_SUBSYSTEM_XPK, "decoding entry #%d to %s", i, real_out_path);
-			}
-
-#ifdef LUNAPURPURA_PNG_SUPPORT
-			if (out_path && !want_png)
-#else
-			if (out_path)
-#endif
-			{
-				FILE *out_f = fopen(real_out_path, "wb");
-				fwrite(rgba, 4, entry->width*entry->height, out_f);
-				fclose(out_f);
-			}
-
-#ifdef LUNAPURPURA_PNG_SUPPORT
-			if (out_path && want_png) {
-				if ((status = XPKDecoder_RGBAToPNG(rgba, entry, real_out_path)) != LUNAPURPURA_OK) {
-					LPWarn(LP_SUBSYSTEM_XPK, "couldn't write PNG!: %s", LPStatusString(status));
-					goto fail;
-				}
-			}
-#endif
+		if (!clu) {
+			LPWarn(LP_SUBSYSTEM_XPK, "can't read CLU: %s: %s", clu_path, LPStatusString(status));
+			return EXIT_FAILURE;
 		}
+
+		fclose(clu_fp);
+		XPK_AttachCLU(xpk, clu);
+	}
+
+	/* Now let's do the thing the user wants. */
+	bool ok = false;
+
+	switch (action) {
+	case XPK_TOOL_ACTION_LIST:
+		ok = xpk_list(xpk);
+		break;
+	case XPK_TOOL_ACTION_DECODE_INDIV:
+		ok = xpk_decode_indiv(xpk);
+		break;
+	case XPK_TOOL_ACTION_DECODE_TILED:
+		ok = xpk_decode_tiled(xpk);
+		break;
+	case XPK_TOOL_ACTION_NONE: /* NOTREACHED */
+		;
+		break;
 	}
 
 	XPKDecoder_FreeRGBA(rgba);
 	XPK_Free(xpk);
-	return EXIT_SUCCESS;
 
-fail:
-	XPKDecoder_FreeRGBA(rgba);
-	XPK_Free(xpk);
-	return EXIT_FAILURE;
+	if (ok) {
+		return EXIT_SUCCESS;
+	} else {
+		return EXIT_FAILURE;
+	}
+}
+
+
+static bool
+xpk_list(const XPK *xpk)
+{
+	printf("%d entry(ies):\n", xpk->n_entries);
+	for (int i = 0; i < xpk->n_entries; i++) {
+		printf("\t");
+		XPKEntry_Pretty(XPK_EntryAtIndex(xpk, i));
+	}
+	return true;
+}
+
+
+static bool
+xpk_decode_indiv(const XPK *xpk)
+{
+	LPStatus status;
+
+	for (int i = 0; i < xpk->n_entries; i++) {
+		XPKEntry *entry = XPK_EntryAtIndex(xpk, i);
+
+		rgba = XPKEntry_Decode(entry, &status);
+
+		if (status != LUNAPURPURA_OK) {
+			LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode: %s", LPStatusString(status));
+			return false;
+		}
+
+		if (!(entry->width && entry->height)) {
+			LPWarn(LP_SUBSYSTEM_XPK, "skipping entry %d with zero width and/or height", i);
+			continue;
+		}
+
+		char real_out_path[512];
+
+		if (xpk->n_entries > 1) {
+			/*
+			 * The number of XPK entries is a uint16, which means the largest
+			 * possible frame number is 65535, which is 5 decimal digits long.
+			 */
+			snprintf(real_out_path, sizeof(real_out_path), "%05d-%s", i, out_path);
+		} else {
+			snprintf(real_out_path, sizeof(real_out_path), "%s", out_path);
+		}
+		LPWarn(LP_SUBSYSTEM_XPK, "decoding entry #%d to %s", i, real_out_path);
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+		if (!want_png)
+#else
+		if (true)
+#endif
+		{
+			FILE *out_f = fopen(real_out_path, "wb"); /* XXX make sure this is ok */
+			fwrite(rgba, 4, entry->width*entry->height, out_f);
+			fclose(out_f);
+		}
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+		if (want_png) {
+			if ((status = XPKDecoder_RGBAToPNG(rgba, entry, real_out_path)) != LUNAPURPURA_OK) {
+				LPWarn(LP_SUBSYSTEM_XPK, "couldn't write PNG!: %s", LPStatusString(status));
+				return false;
+			}
+		}
+#endif
+	}
+
+	return true;
+}
+
+
+static bool
+xpk_decode_tiled(const XPK *xpk)
+{
+	LPStatus status;
+
+	rgba = XPK_DecodeTiledMode(xpk, &status);
+
+	if (status != LUNAPURPURA_OK) {
+		LPWarn(LP_SUBSYSTEM_XPK, "couldn't decode in tiled mode: %s", LPStatusString(status));
+		return false;
+	}
+
+	FILE *out_f = fopen(out_path, "wb"); /* XXX make sure this is ok */
+	fwrite(rgba, 4, 640*480, out_f);
+	fclose(out_f);
+
+	return true;
 }

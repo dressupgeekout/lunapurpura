@@ -6,6 +6,7 @@ add_subdirectory(lputil)
 add_subdirectory(mmfw)
 add_subdirectory(prx)
 add_subdirectory(smf)
+add_subdirectory(xmv)
 add_subdirectory(xpk)
 
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
@@ -18,4 +19,8 @@ endif()
 
 if(${LUNAPURPURA_BUILD_TESTS})
   add_subdirectory(tests)
+endif()
+
+if(${LUNAPURPURA_SDL_SUPPORT})
+  add_subdirectory(xpkview)
 endif()

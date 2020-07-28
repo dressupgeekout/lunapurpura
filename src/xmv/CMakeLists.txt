@@ -1,46 +1,46 @@
 cmake_minimum_required(VERSION 3.0)
 
-########## ########## ##########
-
-list(APPEND lpclu_SOURCES
-  clu.c
+list(APPEND lpxmv_SOURCES
+  xmv.c
 )
 
-list(APPEND lpclu_HEADERS
-  clu.h
+list(APPEND lpxmv_HEADERS
+  xmv.h
 )
 
-add_library(lpclu STATIC ${lpclu_SOURCES} ${lpclu_HEADERS})
+add_library(lpxmv STATIC ${lpxmv_SOURCES} ${lpxmv_HEADERS})
 
-target_include_directories(lpclu PRIVATE  
+target_include_directories(lpxmv PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
+target_link_libraries(lpxmv lputil)
+
 ########## ########## ##########
 
-set(clu_SOURCES
+list(APPEND xmv_SOURCES
   main.c
 )
 
-add_executable(clu ${clu_SOURCES})
+add_executable(xmv ${xmv_SOURCES})
 
-target_include_directories(clu PRIVATE
+target_include_directories(xmv PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
 )
 
-target_link_libraries(clu lpclu lputil)
+target_link_libraries(xmv lpxmv lputil)
 
 ########## ########## ##########
 
 install(
-  TARGETS lpclu clu
+  TARGETS lpxmv xmv
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(
-  FILES ${lpclu_HEADERS}
+  FILES ${lpxmv_HEADERS}
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lunapurpura
 )
