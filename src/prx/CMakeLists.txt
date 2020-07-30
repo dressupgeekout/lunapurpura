@@ -1,15 +1,20 @@
 cmake_minimum_required(VERSION 3.0)
 
-add_library(lpprx STATIC
+list(APPEND lpprx_SOURCES
   prdprs.c
-  prdprs.h
   presagearchive.c
-  presagearchive.h
   presagearchivemember.c
-  presagearchivemember.h
   prx.c
+)
+
+list(APPEND lpprx_HEADERS
+  prdprs.h
+  presagearchive.h
+  presagearchivemember.h
   prx.h
 )
+
+add_library(lpprx STATIC ${lpprx_SOURCES} ${lpprx_HEADERS})
 
 target_include_directories(lpprx PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
@@ -20,9 +25,11 @@ target_link_libraries(lpprx lputil)
 
 ########## ########## ##########
 
-add_executable(prx
+list(APPEND prx_SOURCES
   main.c
 )
+
+add_executable(prx ${prx_SOURCES})
 
 target_include_directories(prx PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
@@ -30,3 +37,16 @@ target_include_directories(prx PRIVATE
 )
 
 target_link_libraries(prx lpprx lputil)
+
+########## ########## ##########
+
+install(
+  TARGETS lpprx prx
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+  FILES ${lpprx_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lunapurpura
+)

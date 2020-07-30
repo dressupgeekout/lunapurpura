@@ -21,3 +21,7 @@ endif()
 if(${LUNAPURPURA_BUILD_TESTS})
   add_subdirectory(tests)
 endif()
+
+if(${LUNAPURPURA_SDL_SUPPORT})
+  add_subdirectory(xpkview)
+endif()
