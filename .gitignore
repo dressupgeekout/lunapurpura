@@ -2,8 +2,9 @@
 *.swp
 .DS_Store
 .vs/**
-build/**
 CMakeSettings.json
+build/**
+html/**
 love/*.so
 love/RESOURCE/**
 out/**
