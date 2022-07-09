@@ -27,7 +27,7 @@ XMVFrameSpec_Init(XMVFrameSpec *spec)
 }
 
 
-/*
+/**
  * Be sure to free the result with XMV_Free() when you're done.
  *
  * The FILE* is assumed to have already been seeked to the appropriate

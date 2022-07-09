@@ -26,7 +26,7 @@ static struct RepeatMarker *current_repeat_marker(XPKDecoder *decoder);
 
 /* ********** */
 
-/*
+/**
  * RepeatMarkers are allocated with push_repeat_marker() and are deallocated
  * with pop_repeat_marker().
  */
@@ -110,7 +110,7 @@ current_repeat_marker(XPKDecoder *d)
 		rgba[rgba_i] = 0xFF; rgba_i++;        \
 	} while (0)
 
-/*
+/**
  * This function will allocate memory for you when successful; you'll need
  * to free the result yourself when you're done with it.
  */

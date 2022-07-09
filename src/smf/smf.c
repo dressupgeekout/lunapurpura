@@ -14,7 +14,7 @@
 
 uint8_t SMF_MAGIC[SMF_MAGIC_LEN] = {173, 126, 121, 0};
 
-/*
+/**
  * Creates a new SMF struct from the file at the given path.
  */
 SMF *

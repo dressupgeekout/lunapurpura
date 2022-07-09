@@ -58,7 +58,7 @@ XPKEntry_Decode(XPKEntry *entry, LPStatus *status)
 
 /* ********** */
 
-/*
+/**
  * The caller is responsible for ensuring the FILE* has advanced to the
  * correct place. The caller MUST NOT close the FILE* directly. Instead, use
  * XPK_Free() when you're done -- this will close the FILE* for you.
@@ -164,7 +164,7 @@ XPK_EntryAtIndex(const XPK *xpk, const int index)
 }
 
 
-/*
+/**
  * Attaching the CLU here transfers ownership to the XPK. Don't try to free the
  * XPK and then free the CLU directly, that's a double-free.
  */
@@ -175,7 +175,7 @@ XPK_AttachCLU(XPK *xpk, CLU *clu)
 }
 
 
-/*
+/**
  * Returns a 640x480 RGBA image. The whole thing is going to be in memory
  * (1200 KB). The caller is expected to free the result.
  */

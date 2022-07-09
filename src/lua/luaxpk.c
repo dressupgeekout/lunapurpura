@@ -31,7 +31,7 @@ static const luaL_Reg functions[] = {
 
 /* ********** */
 
-/*
+/**
  * xpk XPK.NewFromFile(path, clu)
  */
 static int
@@ -64,7 +64,7 @@ luaxpk_NewFromFile(lua_State *L)
 }
 
 
-/*
+/**
  * xpk_entry (table) = XPK.EntryAtIndex(xpk, index)
  *
  * Formats a table for you.
@@ -105,7 +105,7 @@ luaxpk_EntryAtIndex(lua_State *L)
 }
 
 
-/*
+/**
  * rgba (string) = XPK.Decode(xpk, index)
  *
  * 'index' follows the Lua convention of starting with 1, but the C API has

@@ -38,7 +38,7 @@ lp_msg_write(FILE *stream, const char *subsystem, const char *fmt, va_list ap)
 
 /* ********** */
 
-/*
+/**
  * Unconditionally writes the formatted message to the standard output.
  */
 void
@@ -62,7 +62,7 @@ LPWarn(const char *subsystem, const char *fmt, ...)
 }
 
 
-/*
+/**
  * Prints a formatted message to stderr, but only if debug support is
  * enabled in the first place.
  */
@@ -84,7 +84,7 @@ LPGetopt(int nargc, char * const *nargv, const char *options)
 }
 
 
-/*
+/**
  * Returns a string representation of the given LPStatus.
  */
 const char *
@@ -118,7 +118,7 @@ ValidateMagic(uint8_t *region, const uint8_t *expected_magic, const size_t magic
 }
 
 
-/*
+/**
  * The FILE pointer is expected to have already been rewinded to the
  * beginning of the file. If the magic is good, then we return true and
  * leave the file seeked to the end of the magic. Otherwise, the magic is
@@ -154,7 +154,7 @@ done:
 }
 
 
-/*
+/**
  * Reads `count` entries of signed 8-bit values from the `file`, and writes
  * them to `dest`. Returns the count.
  */
@@ -165,7 +165,7 @@ ReadChar(FILE *file, size_t count, char *dest)
 }
 
 
-/*
+/**
  * Reads `count` entries of unsigned 8-bit values from the `file`, and writes
  * them to `dest`. Returns the count.
  */
@@ -176,7 +176,7 @@ ReadUint8(FILE *file, size_t count, uint8_t *dest)
 }
 
 
-/*
+/**
  * Reads `count` entries of unsigned *big-endian* 16-bit values from the
  * `file`, and writes them to `dest`. Returns the count.
  */
@@ -189,7 +189,7 @@ ReadUint16(FILE *file, size_t count, uint16_t *dest)
 }
 
 
-/*
+/**
  * Reads `count` entries of unsigned *little-endian* 16-bit values from the
  * `file`, and writes them to `dest`. Returns the count.
  */
@@ -202,7 +202,7 @@ ReadUint16LE(FILE *file, size_t count, uint16_t *dest)
 }
 
 
-/*
+/**
  * Reads `count` entries of unsigned *big-endian* 32-bit values from the
  * `file`, and writes them to `dest`. Returns the count.
  */
@@ -215,7 +215,7 @@ ReadUint32(FILE *file, size_t count, uint32_t *dest)
 }
 
 
-/*
+/**
  * Reads `count` entries of unsigned *little-endian* 32-bit values from the
  * `file`, and writes them to `dest`. Returns the count.
  */

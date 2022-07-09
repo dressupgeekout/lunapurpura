@@ -13,7 +13,7 @@
 #include "prdprs.h"
 #include "prx.h"
 
-/*
+/**
  * If you want to extract a PRD/PRS pair, then `path1` represents the PRD
  * (header file) and `path2` represents the PRS (data file).
  *
@@ -207,7 +207,7 @@ fail:
 }
 
 
-/*
+/**
  * This will also free all of the individual archive members, too, but make
  * sure to familiarize yourself with the caveats about that.
  */
@@ -261,7 +261,7 @@ PresageArchive_AbsoluteOffsetForMember(const PresageArchive *archive, const Pres
 }
 
 
-/*
+/**
  * Returns the PresageArchiveMember with the given filetype and RID. This does
  * not actually return the data.
  *

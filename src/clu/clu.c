@@ -17,7 +17,7 @@
 
 uint8_t CLU_MAGIC[CLU_MAGIC_LEN] = {0, 0, 0, 0, 128, 0, 0, 255};
 
-/*
+/**
  * The FILE pointer is expected to have already been advanced to the
  * appropriate position.
  *
@@ -70,7 +70,7 @@ CLU_Free(CLU *clu)
 }
 
 
-/*
+/**
  * The caller doesn't need to free the result, it's statically allocated.
  */
 const uint8_t *

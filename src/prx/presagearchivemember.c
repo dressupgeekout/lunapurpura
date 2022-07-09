@@ -70,7 +70,7 @@ PresageArchiveMember_SetName(PresageArchiveMember *member, const char *name)
 }
 
 
-/*
+/**
  * Ownership of the data is taken over, so don't free the data yourself.
  * PresageArchiveMember_FreeData() will take care of it.
  *
@@ -84,7 +84,7 @@ PresageArchiveMember_SetData(PresageArchiveMember *member, uint8_t *data)
 }
 
 
-/*
+/**
  * NOTE: This does NOT free the member->data for you, too. Read the notes
  * for PresageArchiveMember_SetData() for more info.
  */
@@ -96,7 +96,7 @@ PresageArchiveMember_Free(PresageArchiveMember *member)
 }
 
 
-/*
+/**
  * This ONLY frees the member's data. It does NOT free the member struct
  * itself. The purpose of this is to save memory when you want the actual
  * data, but still have access to all metadata in case we need it.

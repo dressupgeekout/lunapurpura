@@ -29,7 +29,7 @@ static const luaL_Reg functions[] = {
 
 /* ********** */
 
-/*
+/**
  * INTERNAL. Creates a plain Lua table which represents the provided
  * PRXMember. Leaves the table on the top of the stack.
  */
@@ -55,7 +55,7 @@ archive_member_to_table(lua_State *L, PresageArchive *archive, PresageArchiveMem
 
 /* ********** */
 
-/*
+/**
  * archive = PRX.NewFromFiles(path1, [path2])
  */
 static int
@@ -95,7 +95,7 @@ luaprx_NewFromFile(lua_State *L)
 	return 1;
 }
 
-/*
+/**
  * n = PRX.NEntries(prx)
  */
 static int
@@ -110,7 +110,7 @@ luaprx_NEntries(lua_State *L)
 }
 
 
-/*
+/**
  * archivemember (table) = PRX.MemberAtIndex(prx, index)
  */
 static int

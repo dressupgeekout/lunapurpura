@@ -26,7 +26,7 @@ static const luaL_Reg functions[] = {
 
 /* ********** */
 
-/*
+/**
  * clu = CLU.NewFromFile(path)
  */
 static int
@@ -55,7 +55,7 @@ luaclu_NewFromFile(lua_State *L)
 }
 
 
-/*
+/**
  * r, g, b = CLU.ColorAtIndex(clu, index)
  *
  * 'index' follows the Lua convention of starting with 1, but the C API has

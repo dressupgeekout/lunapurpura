@@ -106,7 +106,7 @@ MMFW_Close(MMFW *mmfw)
 }
 
 
-/*
+/**
  * Be sure to free the result with MMFW_FreeEntry() when you're done.
  */
 MMFWEntry *
@@ -138,7 +138,7 @@ MMFW_EntryAtIndex(MMFW *mmfw, int i)
 }
 
 
-/*
+/**
  * This also runs the "internal" free routine under the hood for you.
  */
 void
@@ -201,7 +201,7 @@ MMFW_EntryData(const MMFWEntry *entry)
 	}
 }
 
-/*
+/**
  * Returns a string representation of the given MMFW's kind.
  */
 const char *
