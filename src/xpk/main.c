@@ -34,7 +34,9 @@ static enum XPKToolAction action = XPK_TOOL_ACTION_NONE;
 static char *clu_path = NULL;
 static char *out_path = NULL;
 static char *xpk_path = NULL;
+#ifdef LUNAPURPURA_PNG_SUPPORT
 static bool want_png = false;
+#endif
 static uint8_t *rgba = NULL;
 
 /* ********** */
