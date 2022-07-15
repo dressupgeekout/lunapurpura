@@ -32,14 +32,12 @@ target_include_directories(lpxpk PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/../lputil
   ${CMAKE_CURRENT_LIST_DIR}/../clu
-  "${PNG_INCUDE_DIRS}"
 )
 
 target_link_libraries(lpxpk lpclu lputil)
 
 if(${LUNAPURPURA_PNG_SUPPORT})
-  target_compile_options(lpxpk PUBLIC "-DLUNAPURPURA_PNG_SUPPORT" "${PNG_DEFINTIONS}")
-  target_link_libraries(lpxpk "${PNG_LIBRARIES}")
+  target_compile_options(lpxpk PUBLIC "${LUNAPURPURA_PNG_SUPPORT_FLAGS}")
 endif()
 
 ########## ########## ##########
@@ -59,8 +57,7 @@ target_include_directories(xpk PRIVATE
 target_link_libraries(xpk lpxpk lpclu lputil)
 
 if(${LUNAPURPURA_PNG_SUPPORT})
-  target_compile_options(xpk PUBLIC "-DLUNAPURPURA_PNG_SUPPORT" "${PNG_DEFINTIONS}")
-  target_link_libraries(xpk "${PNG_LIBRARIES}")
+  target_compile_options(xpk PUBLIC "${LUNAPURPURA_PNG_SUPPORT_FLAGS}")
 endif()
 
 ########## ########## ##########

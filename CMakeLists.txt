@@ -29,7 +29,7 @@ endif()
 
 if(${LUNAPURPURA_PNG_SUPPORT})
   message(STATUS "PNG support enabled")
-  find_package(PNG REQUIRED)
+  set(LUNAPURPURA_PNG_SUPPORT_FLAGS "-DLUNAPURPURA_PNG_SUPPORT")
 endif()
 
 include(FindPkgConfig)

@@ -5,7 +5,9 @@ list(APPEND lputil_SOURCES
 )
 
 list(APPEND lputil_HEADERS
+  lpstb_image_write.h
   lputil.h
+  stb_image_write.h
 )
 
 # This distribution of getopt(3) and friends is based on NetBSD's
