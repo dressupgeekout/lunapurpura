@@ -9,8 +9,11 @@
 #include <string.h>
 
 #include <lputil.h>
-
 #include <clu.h>
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+#include <stb_image_write.h>
+#endif
 
 #include "xpk.h"
 #include "xpkdecoder.h"
@@ -124,14 +127,6 @@ main(int argc, char *argv[])
 		usage();
 		return EXIT_FAILURE;
 	}
-
-#ifdef LUNAPURPURA_PNG_SUPPORT
-	/* XXX Just for now. */
-	if (action == XPK_TOOL_ACTION_DECODE_TILED && want_png) {
-		LPWarn(LP_SUBSYSTEM_XPK, "sorry, can't decode to PNG in tiled mode for now");
-		return EXIT_FAILURE;
-	}
-#endif
 
 	xpk_path = argv[0];
 	LPStatus status;
@@ -288,9 +283,25 @@ xpk_decode_tiled(const XPK *xpk)
 		return false;
 	}
 
-	FILE *out_f = fopen(out_path, "wb"); /* XXX make sure this is ok */
-	fwrite(rgba, 4, 640*480, out_f);
-	fclose(out_f);
+#ifdef LUNAPURPURA_PNG_SUPPORT
+	if (!want_png)
+#else
+	if (true)
+#endif
+	{
+		FILE *out_f = fopen(out_path, "wb"); /* XXX make sure this is ok */
+		fwrite(rgba, 4, 640*480, out_f);
+		fclose(out_f);
+	}
+
+#ifdef LUNAPURPURA_PNG_SUPPORT
+	if (want_png) {
+		if (!stbi_write_png(out_path, 640, 480, 4, rgba, 480*4)) {
+			LPWarn(LP_SUBSYSTEM_XPK, "stbi_write_png() failed: %d", status);
+			return false;
+		}
+	}
+#endif
 
 	return true;
 }

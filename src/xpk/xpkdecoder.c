@@ -389,4 +389,5 @@ XPKDecoder_RGBAToPNG(const uint8_t *rgba, const XPKEntry *entry, const char *pat
 		return LUNAPURPURA_ERROR;
 	}
 }
+
 #endif /* LUNAPURPURA_PNG_SUPPORT */
