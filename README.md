@@ -59,9 +59,6 @@ If you turn on the mruby bindings, you need to also define the following:
 - PATH `MRUBY_INCLUDEDIR` -- Location of mruby's header files
 - PATH `MRUBY_LIBDIR` -- Location of mruby's library
 
-If you turn on PNG support (enabled by default), then you must have the
-libraries and development headers for zlib and libpng installed.
-
 
 ### build.sh Usage
 
