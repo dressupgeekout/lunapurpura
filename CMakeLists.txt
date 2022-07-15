@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(lunapurpura)
 
+include(GNUInstallDirs)
+
 # User-settable options.
 set(LUNAPURPURA_DEBUG ON CACHE BOOL "Enable debug output")
 set(LUNAPURPURA_BUILD_LUA_BINDINGS OFF CACHE BOOL "Build the Lua/LuaJIT bindings")
@@ -27,7 +29,7 @@ endif()
 
 if(${LUNAPURPURA_PNG_SUPPORT})
   message(STATUS "PNG support enabled")
-  find_package(PNG REQUIRED)
+  set(LUNAPURPURA_PNG_SUPPORT_FLAGS "-DLUNAPURPURA_PNG_SUPPORT")
 endif()
 
 include(FindPkgConfig)

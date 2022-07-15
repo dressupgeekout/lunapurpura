@@ -22,6 +22,25 @@
 #define MSGPREFIX "xpkview"
 #define WINDOW_TITLE "Luna Purpura: XPK Viewer"
 
+struct XPKViewState {
+	SDL_Window *window;
+	SDL_Renderer *renderer;
+
+	int which_entry;
+	char *xpk_path;
+	FILE *xpk_fp;
+	XPK *xpk;
+	XPKEntry *xpkentry;
+	SDL_Texture *xpkentry_tx;
+	SDL_Rect entry_rect;
+
+	uint8_t *checkerboard_rgba;
+	SDL_Texture *checkerboard_tx;
+	bool centered;
+	bool checkerboard_on;
+};
+static struct XPKViewState app;
+
 static bool XPKView_Setup(void);
 static bool XPKView_CreateCheckerboardPattern(void);
 static bool XPKView_MainLoop(void);
@@ -30,30 +49,32 @@ static bool XPKView_HandleKeyboard(SDL_Keycode key);
 static bool XPKView_LoadXPKEntry(void);
 static void XPKView_NextEntry(void);
 static void XPKView_PreviousEntry(void);
-
-static SDL_Window *window;
-static SDL_Renderer *renderer;
-static uint8_t *checkerboard_rgba = NULL;
-static SDL_Texture *checkerboard_tx;
-static char *xpk_path = NULL;
-static FILE *xpk_fp = NULL;
-static XPK *xpk = NULL;
-static XPKEntry *xpkentry = NULL;
-static int which_entry = 0;
-static SDL_Texture *xpkentry_tx;
+static void XPKView_ToggleCentered(void);
+static void XPKView_ToggleCheckerboard(void);
 
 /* ********** */
 
 int
 main(int argc, char *argv[])
 {
+	app.which_entry = 0;
+	app.xpk_path = NULL;
+	app.xpk_fp = NULL;
+	app.checkerboard_rgba = NULL;
+	app.xpk = NULL;
+	app.xpkentry = NULL;
+	app.xpkentry_tx = NULL;
+	app.entry_rect = (SDL_Rect){0, 0, 0, 0};
+	app.centered = false;
+	app.checkerboard_on = true;
+
 	if (argc < 3) {
 		LPWarn(MSGPREFIX, "usage: xpkview clufile xpkfile");
 		goto fail;
 	}
 
 	char *clu_path = argv[1];
-	xpk_path = argv[2];
+	app.xpk_path = argv[2];
 
 	FILE *clu_fp = fopen(clu_path, "rb");
 	if (!clu_fp) {
@@ -69,19 +90,19 @@ main(int argc, char *argv[])
 		goto fail;
 	}
 
-	xpk_fp = fopen(xpk_path, "rb");
-	if (!xpk_fp) {
-		LPWarn(MSGPREFIX, "couldn't open XPK file: %s: %s", xpk_path, strerror(errno));
+	app.xpk_fp = fopen(app.xpk_path, "rb");
+	if (!app.xpk_fp) {
+		LPWarn(MSGPREFIX, "couldn't open XPK file: %s: %s", app.xpk_path, strerror(errno));
 		goto fail;
 	}
 
-	xpk = XPK_NewFromFile(xpk_fp, &status);
+	app.xpk = XPK_NewFromFile(app.xpk_fp, &status);
 	if (status != LUNAPURPURA_OK) {
-		LPWarn(MSGPREFIX, "couldn't open XPK file: %s: %s", xpk_path, LPStatusString(status));
+		LPWarn(MSGPREFIX, "couldn't open XPK file: %s: %s", app.xpk_path, LPStatusString(status));
 		goto fail;
 	}
 
-	XPK_AttachCLU(xpk, clu);
+	XPK_AttachCLU(app.xpk, clu);
 
 	if (!XPKView_Setup()) {
 		goto fail;
@@ -93,12 +114,12 @@ main(int argc, char *argv[])
 
 	XPKView_LoadXPKEntry();
 
-	/* Blit the checkerboard to the window. */
+	/* Obtain the checkerboard texture. */
 	SDL_Surface *checkerboard_surf = SDL_CreateRGBSurfaceWithFormatFrom(
-		checkerboard_rgba, 32, 32, 32, 32*4, SDL_PIXELFORMAT_RGBA32
+		app.checkerboard_rgba, 32, 32, 32, 32*4, SDL_PIXELFORMAT_RGBA32
 	);
-	free(checkerboard_rgba);
-	checkerboard_tx = SDL_CreateTextureFromSurface(renderer, checkerboard_surf);
+	free(app.checkerboard_rgba);
+	app.checkerboard_tx = SDL_CreateTextureFromSurface(app.renderer, checkerboard_surf);
 	SDL_FreeSurface(checkerboard_surf);
 
 	if (!XPKView_MainLoop()) {
@@ -122,13 +143,13 @@ XPKView_Setup(void)
 		return false;
 	}
 
-	if (SDL_CreateWindowAndRenderer(640, 480, 0, &window, &renderer) != 0) {
+	if (SDL_CreateWindowAndRenderer(640, 480, 0, &app.window, &app.renderer) != 0) {
 		LPWarn(MSGPREFIX, "Couldn't create window and/or renderer: %s", SDL_GetError());
 		return false;
 	}
 
-	SDL_SetWindowTitle(window, WINDOW_TITLE);
-	SDL_ShowWindow(window);
+	SDL_SetWindowTitle(app.window, WINDOW_TITLE);
+	SDL_ShowWindow(app.window);
 	return true;
 }
 
@@ -146,9 +167,9 @@ XPKView_CreateCheckerboardPattern(void)
 	SDL_Color white = (SDL_Color){255, 255, 255, 255};
 	SDL_Color gray = (SDL_Color){240, 240, 240, 240};
 
-	checkerboard_rgba = calloc(4, checker_w*checker_h*4);
+	app.checkerboard_rgba = calloc(4, checker_w*checker_h*4);
 
-	if (!checkerboard_rgba) {
+	if (!app.checkerboard_rgba) {
 		LPWarn(MSGPREFIX, "couldn't malloc the checkerboard!");
 		return false;
 	}
@@ -158,34 +179,34 @@ XPKView_CreateCheckerboardPattern(void)
 	/* Top row: WHITE, GRAY */
 	for (int y = 0; y < checker_h; y++) {
 		for (int x = 0; x < checker_w; x++) {
-			checkerboard_rgba[i++] = white.r;
-			checkerboard_rgba[i++] = white.g;
-			checkerboard_rgba[i++] = white.b;
-			checkerboard_rgba[i++] = white.a;
+			app.checkerboard_rgba[i++] = white.r;
+			app.checkerboard_rgba[i++] = white.g;
+			app.checkerboard_rgba[i++] = white.b;
+			app.checkerboard_rgba[i++] = white.a;
 		}
 
 		for (int x = 0; x < checker_w; x++) {
-			checkerboard_rgba[i++] = gray.r;
-			checkerboard_rgba[i++] = gray.g;
-			checkerboard_rgba[i++] = gray.b;
-			checkerboard_rgba[i++] = gray.a;
+			app.checkerboard_rgba[i++] = gray.r;
+			app.checkerboard_rgba[i++] = gray.g;
+			app.checkerboard_rgba[i++] = gray.b;
+			app.checkerboard_rgba[i++] = gray.a;
 		}
 	}
 
 	/* Bottom row: GRAY, WHITE */
 	for (int y = 0; y < checker_h; y++) {
 		for (int x = 0; x < checker_w; x++) {
-			checkerboard_rgba[i++] = gray.r;
-			checkerboard_rgba[i++] = gray.g;
-			checkerboard_rgba[i++] = gray.b;
-			checkerboard_rgba[i++] = gray.a;
+			app.checkerboard_rgba[i++] = gray.r;
+			app.checkerboard_rgba[i++] = gray.g;
+			app.checkerboard_rgba[i++] = gray.b;
+			app.checkerboard_rgba[i++] = gray.a;
 		}
 
 		for (int x = 0; x < checker_w; x++) {
-			checkerboard_rgba[i++] = white.r;
-			checkerboard_rgba[i++] = white.g;
-			checkerboard_rgba[i++] = white.b;
-			checkerboard_rgba[i++] = white.a;
+			app.checkerboard_rgba[i++] = white.r;
+			app.checkerboard_rgba[i++] = white.g;
+			app.checkerboard_rgba[i++] = white.b;
+			app.checkerboard_rgba[i++] = white.a;
 		}
 	}
 
@@ -201,7 +222,7 @@ XPKView_MainLoop(void)
 	SDL_Event event;
 
 	int win_w, win_h;
-	SDL_GetWindowSize(window, &win_w, &win_h);
+	SDL_GetWindowSize(app.window, &win_w, &win_h);
 
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
@@ -222,20 +243,21 @@ XPKView_MainLoop(void)
 		}
 
 		/* Now we can draw stuff. */
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
+		SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 0);
+		SDL_RenderClear(app.renderer);
 
-		for (int i = 0; i < win_h/32; i++) {
-			for (int j = 0; j < win_w/32; j++) {
-				SDL_Rect dstrect = (SDL_Rect){32*j, 32*i, 32, 32};
-				SDL_RenderCopy(renderer, checkerboard_tx, NULL, &dstrect);
+		if (app.checkerboard_on) {
+			for (int i = 0; i < win_h/32; i++) {
+				for (int j = 0; j < win_w/32; j++) {
+					SDL_Rect dstrect = (SDL_Rect){32*j, 32*i, 32, 32};
+					SDL_RenderCopy(app.renderer, app.checkerboard_tx, NULL, &dstrect);
+				}
 			}
 		}
 
-		SDL_Rect entry_rect = (SDL_Rect){xpkentry->x, xpkentry->y, xpkentry->width, xpkentry->height};
-		SDL_RenderCopy(renderer, xpkentry_tx, NULL, &entry_rect);
+		SDL_RenderCopy(app.renderer, app.xpkentry_tx, NULL, &app.entry_rect);
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(app.renderer);
 
 		/* LOVE2D does this. It can dramatically reduce CPU usage. */
 		SDL_Delay(1);
@@ -248,11 +270,11 @@ XPKView_MainLoop(void)
 static void
 XPKView_Shutdown(void)
 {
-	if (window) SDL_DestroyWindow(window);
-	if (renderer) SDL_DestroyRenderer(renderer);
-	if (checkerboard_tx) SDL_DestroyTexture(checkerboard_tx);
-	if (xpkentry_tx) SDL_DestroyTexture(xpkentry_tx);
-	if (xpk) XPK_Free(xpk);
+	if (app.window) SDL_DestroyWindow(app.window);
+	if (app.renderer) SDL_DestroyRenderer(app.renderer);
+	if (app.checkerboard_tx) SDL_DestroyTexture(app.checkerboard_tx);
+	if (app.xpkentry_tx) SDL_DestroyTexture(app.xpkentry_tx);
+	if (app.xpk) XPK_Free(app.xpk);
 	SDL_Quit();
 }
 
@@ -269,6 +291,12 @@ XPKView_HandleKeyboard(SDL_Keycode key)
 		break;
 	case SDLK_RIGHT:
 		XPKView_NextEntry();
+		break;
+	case SDLK_b:
+		XPKView_ToggleCheckerboard();
+		break;
+	case SDLK_c:
+		XPKView_ToggleCentered();
 		break;
 	case SDLK_q:
 		return true;
@@ -287,24 +315,33 @@ XPKView_HandleKeyboard(SDL_Keycode key)
 static bool
 XPKView_LoadXPKEntry(void)
 {
-	if (xpkentry_tx) SDL_DestroyTexture(xpkentry_tx);
+	if (app.xpkentry_tx) SDL_DestroyTexture(app.xpkentry_tx);
 
-	xpkentry = XPK_EntryAtIndex(xpk, which_entry);
+	app.xpkentry = XPK_EntryAtIndex(app.xpk, app.which_entry);
 
 	LPStatus status;
-	uint8_t *rgba = XPKEntry_Decode(xpkentry, &status);
+	uint8_t *rgba = XPKEntry_Decode(app.xpkentry, &status);
 
 	if (status != LUNAPURPURA_OK) {
-		LPWarn(MSGPREFIX, "Couldn't decode XPK entry #%d! - %s", which_entry, LPStatusString(status));
+		LPWarn(MSGPREFIX, "Couldn't decode XPK entry #%d! - %s", app.which_entry, LPStatusString(status));
 		return false;
 	}
 
 	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(
-		rgba, xpkentry->width, xpkentry->height, 32, xpkentry->width*4, SDL_PIXELFORMAT_RGBA32
+		rgba, app.xpkentry->width, app.xpkentry->height, 32, app.xpkentry->width*4, SDL_PIXELFORMAT_RGBA32
 	);
-	xpkentry_tx = SDL_CreateTextureFromSurface(renderer, surf);
+	app.xpkentry_tx = SDL_CreateTextureFromSurface(app.renderer, surf);
 	SDL_FreeSurface(surf);
 	XPKDecoder_FreeRGBA(rgba);
+
+	app.entry_rect.x = app.xpkentry->x;
+	app.entry_rect.y = app.xpkentry->y;
+	app.entry_rect.w = app.xpkentry->width;
+	app.entry_rect.h = app.xpkentry->height;
+
+	/* Do this twice on purpose so that we preserve the current setting. */
+	XPKView_ToggleCentered();
+	XPKView_ToggleCentered();
 
 	return true;
 }
@@ -313,8 +350,8 @@ XPKView_LoadXPKEntry(void)
 static void
 XPKView_NextEntry(void)
 {
-	if (which_entry < (xpk->n_entries-1)) {
-		which_entry++;
+	if (app.which_entry < (app.xpk->n_entries-1)) {
+		app.which_entry++;
 		XPKView_LoadXPKEntry();
 	}
 }
@@ -323,8 +360,36 @@ XPKView_NextEntry(void)
 static void
 XPKView_PreviousEntry(void)
 {
-	if (which_entry > 0) {
-		which_entry--;
+	if (app.which_entry > 0) {
+		app.which_entry--;
 		XPKView_LoadXPKEntry();
 	}
+}
+
+
+static void
+XPKView_ToggleCentered(void)
+{
+	app.centered = !app.centered;
+
+	int win_w, win_h;
+	SDL_GetWindowSize(app.window, &win_w, &win_h);
+
+	if (app.centered) {
+		app.entry_rect.x = (win_w/2) - (app.xpkentry->width/2);
+		app.entry_rect.y = (win_h/2) - (app.xpkentry->height/2);
+	} else {
+		app.entry_rect.x = app.xpkentry->x;
+		app.entry_rect.y = app.xpkentry->y;
+	}
+
+	app.entry_rect.w = app.xpkentry->width;
+	app.entry_rect.h = app.xpkentry->height;
+}
+
+
+static void
+XPKView_ToggleCheckerboard(void)
+{
+	app.checkerboard_on = !app.checkerboard_on;
 }
