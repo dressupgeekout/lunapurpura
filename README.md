@@ -109,8 +109,6 @@ license. Take a look at the LICENSE document for more details.
 - [Purple Moon on Fandom.com][purple-moon-fandom]
 
 
-[![forthebadge](https://forthebadge.com/images/badges/built-by-codebabes.svg)](https://forthebadge.com)
-
 [love]: https://love2d.org
 [Purple Moon]: https://en.wikipedia.org/wiki/Purple_Moon
 [purple-moon-fandom]: https://purplemoon.fandom.com/wiki/Purple_Moon_Wiki
