@@ -7,14 +7,19 @@
 #ifndef LUNAPURPURA_XPK_H
 #define LUNAPURPURA_XPK_H
 
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <lputil.h>
 
 #include <clu.h>
 
 #define LP_SUBSYSTEM_XPK "xpk"
+
+#define XPK_TILED_TILE_COUNT 64
+#define XPK_TILED_TILE_WIDTH 80
+#define XPK_TILED_TILE_HEIGHT 60
 
 #define XPK_MAGIC_LEN 4
 
@@ -60,5 +65,6 @@ void XPK_Free(XPK *xpk);
 XPKEntry *XPK_EntryAtIndex(const XPK *xpk, const int index);
 void XPK_AttachCLU(XPK *xpk, CLU *clu);
 uint8_t *XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status);
+bool XPK_TiledModeOK(const XPK *xpk);
 
 #endif /* LUNAPURPURA_XPK_H */

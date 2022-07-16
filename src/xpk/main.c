@@ -274,8 +274,11 @@ xpk_decode_indiv(const XPK *xpk)
 static bool
 xpk_decode_tiled(const XPK *xpk)
 {
-	LPStatus status;
+	if (!XPK_TiledModeOK(xpk)) {
+		return false;
+	}
 
+	LPStatus status;
 	rgba = XPK_DecodeTiledMode(xpk, &status);
 
 	if (status != LUNAPURPURA_OK) {

@@ -232,3 +232,33 @@ XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
 	*status = LUNAPURPURA_OK;
 	return complete_rgba;
 }
+
+
+/*
+ * Indicates whether it is safe to attempt to decode with tiled mode. We say it
+ * is OK if it has the correct number of entries, and every entry has the
+ * expected dimensions.
+ */
+bool
+XPK_TiledModeOK(const XPK *xpk)
+{
+	if (xpk->n_entries != XPK_TILED_TILE_COUNT) {
+		LPWarn(LP_SUBSYSTEM_XPK, "doesn't meet criteria for tiled mode (%d entries != %d)", xpk->n_entries, XPK_TILED_TILE_COUNT);
+		return false;
+	} else {
+		for (int i = 0; i < XPK_TILED_TILE_COUNT; i++) {
+			int this_w = xpk->entries[i]->width;
+			int this_h = xpk->entries[i]->height;
+			if ((this_w != XPK_TILED_TILE_WIDTH) || (this_h != XPK_TILED_TILE_HEIGHT)) {
+				LPWarn(
+					LP_SUBSYSTEM_XPK,
+					"doesn't meet criteria for tiled mode (entry #%d dimensions=%dx%d != %dx%d)",
+					i, this_w, this_h, XPK_TILED_TILE_WIDTH, XPK_TILED_TILE_HEIGHT
+				);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
