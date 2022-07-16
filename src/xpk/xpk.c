@@ -215,7 +215,6 @@ XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
 		 */
 		complete_cur_x = tile->width * (tile_index % tile_count_x);
 		complete_cur_y = tile->height * (tile_index / tile_count_y);
-		printf("%d,%d\n", complete_cur_x, complete_cur_y);
 
 		/* (2) ...splat its contents into the correct spot in the grander image. */
 		for (int y = 0; y < tile->height; y++) {
