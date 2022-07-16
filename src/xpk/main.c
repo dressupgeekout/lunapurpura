@@ -296,7 +296,7 @@ xpk_decode_tiled(const XPK *xpk)
 
 #ifdef LUNAPURPURA_PNG_SUPPORT
 	if (want_png) {
-		int rv = stbi_write_png(out_path, 640, 480, 4, rgba, 480*4);
+		int rv = stbi_write_png(out_path, 640, 480, 4, rgba, 640*4);
 		if (!rv) {
 			LPWarn(LP_SUBSYSTEM_XPK, "stbi_write_png() failed: %d", rv);
 			return false;

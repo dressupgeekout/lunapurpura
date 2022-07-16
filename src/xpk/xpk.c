@@ -176,8 +176,9 @@ XPK_AttachCLU(XPK *xpk, CLU *clu)
 
 
 /*
- * Returns a 640x480 RGBA image. The whole thing is going to be in memory
- * (1200 KB). The caller is expected to free the result.
+ * Returns a 640x480 RGBA image. The whole thing is going to be in memory (1200
+ * KB). The caller is expected to free the result, but we return NULL in case
+ * of error.
  */
 uint8_t *
 XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
@@ -198,37 +199,33 @@ XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
 	XPKEntry *tile = NULL;
 
 	/* (1) For each tile... */
-	for (int tile_y = 0; tile_y < tile_count_y; tile_y++) {
-		for (int tile_x = 0; tile_x < tile_count_x; tile_x++) {
-			tile = XPK_EntryAtIndex(xpk, (tile_y*tile_count_x)+tile_x);
-			uint8_t *tile_rgba = XPKEntry_Decode(tile, &xpk_entry_decode_status);
+	for (int tile_index = 0; tile_index < (tile_count_x*tile_count_y); tile_index++) {
+		tile = XPK_EntryAtIndex(xpk, tile_index);
+		uint8_t *tile_rgba = XPKEntry_Decode(tile, &xpk_entry_decode_status);
 
-			if (xpk_entry_decode_status != LUNAPURPURA_OK) {
-				free(complete_rgba);
-				*status = xpk_entry_decode_status;
-				return NULL;
-			}
+		if (xpk_entry_decode_status != LUNAPURPURA_OK) {
+			free(complete_rgba);
+			*status = xpk_entry_decode_status;
+			return NULL;
+		}
 
-			/*
-			 * The X and Y coordinates of the top-left corner of the current tile,
-			 * in terms of the complete picture.
-			 */
-			complete_cur_x = tile->width * tile_x;
-			complete_cur_y = tile->height * tile_y;
+		/*
+		 * The X and Y coordinates of the top-left corner of the current tile,
+		 * in terms of the complete picture.
+		 */
+		complete_cur_x = tile->width * (tile_index % tile_count_x);
+		complete_cur_y = tile->height * (tile_index / tile_count_y);
+		printf("%d,%d\n", complete_cur_x, complete_cur_y);
 
-			/* (2) ...splat its contents into the correct spot in the grander image. */
-			for (int y = 0; y < tile->height; y++) {
-				for (int x = 0; x < tile->width; x++) {
-					int this_color_pos = (y * tile->width * 4) + (x * 4);
-					int this_pixel_pos = (complete_cur_y * 640 * 4) + (complete_cur_x * 4);
-					complete_rgba[this_pixel_pos+0] = tile_rgba[this_color_pos+0];
-					complete_rgba[this_pixel_pos+1] = tile_rgba[this_color_pos+1];
-					complete_rgba[this_pixel_pos+2] = tile_rgba[this_color_pos+2];
-					complete_rgba[this_pixel_pos+3] = tile_rgba[this_color_pos+3];
-					complete_cur_x++;
-				}
-				complete_cur_y++;
-				complete_cur_x -= tile->width;
+		/* (2) ...splat its contents into the correct spot in the grander image. */
+		for (int y = 0; y < tile->height; y++) {
+			for (int x = 0; x < tile->width; x++) {
+				unsigned int this_color_pos = (y * tile->width * 4) + (x * 4);
+				unsigned int this_pixel_pos = ((complete_cur_y+y) * 640 * 4) + ((complete_cur_x+x) * 4);
+				complete_rgba[this_pixel_pos+0] = tile_rgba[this_color_pos+0];
+				complete_rgba[this_pixel_pos+1] = tile_rgba[this_color_pos+1];
+				complete_rgba[this_pixel_pos+2] = tile_rgba[this_color_pos+2];
+				complete_rgba[this_pixel_pos+3] = tile_rgba[this_color_pos+3];
 			}
 		}
 	}
