@@ -274,8 +274,11 @@ xpk_decode_indiv(const XPK *xpk)
 static bool
 xpk_decode_tiled(const XPK *xpk)
 {
-	LPStatus status;
+	if (!XPK_TiledModeOK(xpk)) {
+		return false;
+	}
 
+	LPStatus status;
 	rgba = XPK_DecodeTiledMode(xpk, &status);
 
 	if (status != LUNAPURPURA_OK) {
@@ -296,8 +299,9 @@ xpk_decode_tiled(const XPK *xpk)
 
 #ifdef LUNAPURPURA_PNG_SUPPORT
 	if (want_png) {
-		if (!stbi_write_png(out_path, 640, 480, 4, rgba, 480*4)) {
-			LPWarn(LP_SUBSYSTEM_XPK, "stbi_write_png() failed: %d", status);
+		int rv = stbi_write_png(out_path, 640, 480, 4, rgba, 640*4);
+		if (!rv) {
+			LPWarn(LP_SUBSYSTEM_XPK, "stbi_write_png() failed: %d", rv);
 			return false;
 		}
 	}

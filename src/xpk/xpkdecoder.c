@@ -299,6 +299,35 @@ XPKDecoder_Decode(XPKDecoder *d, XPKEntry *entry, LPStatus *status)
 						}
 					}
 					break;
+				case XPKINST_BIGLINEREPEAT:
+					{
+						switch (byte) {
+						case XPKINST_LINEREPEAT_END:
+							{
+								struct RepeatMarker *marker = current_repeat_marker(d);
+								if (marker->reps > 0) {
+									marker->reps--;
+								}
+								if (marker->reps > 0) {
+									fseek(entry->xpk->file, marker->loc, SEEK_SET);
+								} else {
+									pop_repeat_marker(d);
+								}
+								NEWLINE(d);
+#ifdef LUNAPURPURA_XPK_TRACE
+								LPWarn(LP_SUBSYSTEM_XPK, "BIGLINEREPEAT_END (%d remaining)", marker->reps);
+#endif
+								break;
+							}
+						default:
+							push_repeat_marker(d, true, 16+argument, ftell(entry->xpk->file));
+							NEWLINE(d);
+#ifdef LUNAPURPURA_XPK_TRACE
+							LPWarn(LP_SUBSYSTEM_XPK, "BIGLINEREPEAT %d", 16+argument);
+#endif
+						}
+					}
+					break;
 				case XPKINST_SETXNL:
 					if (argument) {
 						d->cur_x = argument;
