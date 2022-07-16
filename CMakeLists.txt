@@ -54,5 +54,11 @@ if(${LUNAPURPURA_DEBUG})
   add_definitions(-DLUNAPURPURA_DEBUG)
 endif()
 
+include(TestBigEndian)
+test_big_endian(LUNAPURPURA_BIG_ENDIAN)
+if(${LUNAPURPURA_BIG_ENDIAN})
+  add_definitions(-DLUNAPURPURA_BIG_ENDIAN)
+endif()
+
 # Good to go.
 add_subdirectory(src)
