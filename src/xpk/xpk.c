@@ -175,7 +175,7 @@ XPK_AttachCLU(XPK *xpk, CLU *clu)
 }
 
 
-/*
+/**
  * Returns a 640x480 RGBA image. The whole thing is going to be in memory (1200
  * KB). The caller is expected to free the result, but we return NULL in case
  * of error.
@@ -234,7 +234,7 @@ XPK_DecodeTiledMode(const XPK *xpk, LPStatus *status)
 }
 
 
-/*
+/**
  * Indicates whether it is safe to attempt to decode with tiled mode. We say it
  * is OK if it has the correct number of entries, and every entry has the
  * expected dimensions.
