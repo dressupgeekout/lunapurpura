@@ -236,28 +236,36 @@ PresageArchive_Close(PresageArchive *archive)
 uint32_t
 PresageArchive_AbsoluteOffsetForMemberAtIndex(const PresageArchive *archive, const int index)
 {
+	uint32_t offset;
+
 	switch (archive->kind) {
 	case PRESAGE_ARCHIVE_KIND_PRDPRS:
-		return archive->members[index]->offset;
+		offset = archive->members[index]->offset;
 		break;
 	case PRESAGE_ARCHIVE_KIND_PRX:
-		return archive->data_offset_start + archive->members[index]->offset;
+		offset = archive->data_offset_start + archive->members[index]->offset;
 		break;
 	}
+
+	return offset;
 }
 
 
 uint32_t
 PresageArchive_AbsoluteOffsetForMember(const PresageArchive *archive, const PresageArchiveMember *member)
 {
+	uint32_t offset;
+
 	switch (archive->kind) {
 	case PRESAGE_ARCHIVE_KIND_PRDPRS:
-		return member->offset;
+		offset = member->offset;
 		break;
 	case PRESAGE_ARCHIVE_KIND_PRX:
-		return archive->data_offset_start + member->offset;
+		offset = archive->data_offset_start + member->offset;
 		break;
 	}
+
+	return offset;
 }
 
 
