@@ -9,6 +9,10 @@ add_subdirectory(smf)
 add_subdirectory(xmv)
 add_subdirectory(xpk)
 
+if(${LUNAPURPURA_BUILD_JANET_BINDINGS})
+  add_subdirectory(janet)
+endif()
+
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
   add_subdirectory(lua)
 endif()

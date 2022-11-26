@@ -11,6 +11,12 @@ set(LUNAPURPURA_BUILD_TESTS ON CACHE BOOL "Build the test applications")
 set(LUNAPURPURA_PNG_SUPPORT ON CACHE BOOL "Enable conversion to PNG")
 set(LUNAPURPURA_SDL_SUPPORT ON CACHE BOOL "Enable apps which require SDL2")
 
+if(${LUNAPURPURA_BUILD_JANET_BINDINGS})
+  message(STATUS "Janet bindings enabled")
+  set(JANET_INCLUDEDIR "" CACHE PATH "Location of Janet's header files")
+  set(JANET_LIBDIR "" CACHE PATH "Location of Janet's library")
+endif()
+
 if(${LUNAPURPURA_BUILD_LUA_BINDINGS})
   message(STATUS "Lua bindings enabled")
   set(LUA_INCLUDEDIR "" CACHE PATH "Location of Lua 5.1/LuaJIT's header files")
